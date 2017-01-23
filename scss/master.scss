@@ -62,6 +62,17 @@ $header-text-color: #FFF;
 
 .header__nickname-dropdown {}
 
+.header__dropdown-title {
+  display: flex;
+  align-items: center;
+}
+
+.header__profile-picture {
+  height: 35px;
+  border-radius: 25px;
+  margin-right: 10px;
+}
+
 .header__dropdown-arrow {
     position: absolute;
     top: 15px;
@@ -103,7 +114,8 @@ $header-text-color: #FFF;
 .header__dropdown-content {
     position: absolute;
     top: 50px;
-    min-width: 150px;
+    left: 0;
+    min-width: 200px;
     background-color: #09340E;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     display: none;
