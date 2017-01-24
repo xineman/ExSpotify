@@ -46,43 +46,94 @@
             </div>
         </div>
     </header>
-    <header class="content-header">
-        <div class="header__nav container">
-            <div class="flex-item">
-                <div class="content-header__source-wrapper">
-                    <div id="content-header__source-dropdown" class="content-header__source-dropdown dropdown">
-                        <div class="content-header__dropdown-title dropdown-title">
-                            <p id="current-source" class="content-header__nav-item">Source: Library</p>
-                            <div class="header__dropdown-arrow dropdown-arrow"></div>
-                        </div>
-                        <div id="div" class="content-header__dropdown-content dropdown-content">
-                            <ul id="ul" class="content-header__dropdown-options">
-                                <li id="choose-library"><a id="choose-library-a" class="content-header__dropdown-item" href="#">Library</a></li>
-                                <li id="choose-url"><a id="choose-url-a" class="content-header__dropdown-item" href="#">Playlist URL</a></li>
-                            </ul>
+    <main>
+        <section class="content-header">
+            <div class="header__nav container">
+                <div class="flex-item">
+                    <div class="content-header__source-wrapper">
+                        <div class="content-header__source-dropdown dropdown">
+                            <div class="content-header__dropdown-title dropdown-title">
+                                <p id="current-source" class="content-header__nav-item">Source: Library</p>
+                                <div class="header__dropdown-arrow dropdown-arrow"></div>
+                            </div>
+                            <div class="content-header__dropdown-content dropdown-content">
+                                <ul class="content-header__dropdown-options">
+                                    <li id="choose-library" class="content-header__dropdown-item">Library</li>
+                                    <li id="choose-url" class="content-header__dropdown-item">Playlist URL</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="content-header__source-options">
-                <div class="content-header__library-source-wrapper content-header__library-source-wrapper_active">
-                    <ul>
-                        <li><a class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
-                        <li><a class="content-header__nav-item content-header__library-source" href="#">Albums</a></li>
-                        <li><a class="content-header__nav-item content-header__library-source" href="#">Songs</a></li>
-                    </ul>
+                <div class="content-header__source-options">
+                    <div class="content-header__library-source-wrapper content-header__library-source-wrapper_active">
+                        <ul>
+                            <li><a id="choose-playlists" class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
+                            <li><a id="choose-albums" class="content-header__nav-item content-header__library-source" href="#">Albums</a></li>
+                            <li><a id="choose-songs" class="content-header__nav-item content-header__library-source" href="#">Songs</a></li>
+                        </ul>
+                    </div>
+                    <form class="content-header__url-source-wrapper">
+                        <input class="content-header__url-input" type="text" name="playlist-url" value="" placeholder="Playlist url">
+                        <a class="content-header__url-button">Open</a>
+                    </form>
                 </div>
-                <form class="content-header__url-source-wrapper">
-                    <input class="content-header__url-input" type="text" name="playlist-url" value="" placeholder="Playlist url">
-                    <a class="content-header__url-button">Open</a>
-                </form>
+                <div class="flex-item">
+                    <a class="content-header__nav-item content-header__go-btn" href="#">Go!</a>
+                </div>
             </div>
-            <div class="flex-item">
-                <a class="content-header__nav-item content-header__go-btn" href="#">Go!</a>
-            </div>
-
-        </div>
-    </header>
+        </section>
+        <section class="main-section container">
+            <aside class="main-section__playlists-list">
+                <div class="main-section__playlist-summary main-section__playlist-summary_active">
+                    <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
+                    <div class="main-section__playlist-text">
+                        <h3 class="main-section__playlist-name">First</h3>
+                        <h4 class="main-section__playlist-author">by Spotify</h4>
+                    </div>
+                </div>
+                <div class="main-section__playlist-summary">
+                    <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
+                    <div class="main-section__playlist-text">
+                        <h3 class="main-section__playlist-name">Second</h3>
+                        <h4 class="main-section__playlist-author">by Spotify</h4>
+                    </div>
+                </div>
+                <div class="main-section__playlist-summary">
+                    <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
+                    <div class="main-section__playlist-text">
+                        <h3 class="main-section__playlist-name">Third</h3>
+                        <h4 class="main-section__playlist-author">by Spotify</h4>
+                    </div>
+                </div>
+                <div class="main-section__playlist-summary">
+                    <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
+                    <div class="main-section__playlist-text">
+                        <h3 class="main-section__playlist-name">Forth</h3>
+                        <h4 class="main-section__playlist-author">by Spotify</h4>
+                    </div>
+                </div>
+            </aside>
+            <section class="main-section__songs">
+                <table class="main-section__songs-list">
+                    <tr>
+                        <th>Check</th>
+                        <th>Song</th>
+                        <th>Artist</th>
+                        <th>Album</th>
+                        <th>Duration</th>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" /></td>
+                        <td>Lose Yourself</td>
+                        <td>Eminem</td>
+                        <td>8 Mile</td>
+                        <td>5:21</td>
+                    </tr>
+                </table>
+            </section>
+        </section>
+    </main>
     <script type="text/javascript" src="js/jquery-3.1.1.min.js">
     </script>
     <script type="text/javascript" src="js/common.js">

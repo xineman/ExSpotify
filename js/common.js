@@ -18,32 +18,52 @@ $(document).ready(function() {
             $(this).removeClass('dropdown-content_active');
         });
     $('.content-header__source-dropdown').click(function(event) {
-      console.log(event.target.id);
-      $(this).find('.dropdown-content').removeClass('dropdown-content_active');
         switch (event.target.id) {
             case "choose-library":
-            case "choose-library-a":
                 {
                     $('.content-header__library-source-wrapper').addClass("content-header__library-source-wrapper_active");
                     $('.content-header__url-source-wrapper').removeClass("content-header__url-source-wrapper_active");
                     $('#current-source').html("Source: Library");
+                    $(this).find('.dropdown-content').removeClass('dropdown-content_active');
+                    if (!$('#choose-songs').hasClass('content-header__library-source_active')) {
+                        $('.main-section__playlists-list').removeClass("main-section__playlists-list_hidden");
+                        $('.main-section__songs').removeClass('main-section__songs_only');
+                    }
                     break;
                 }
             case "choose-url":
-            case "choose-url-a":
                 {
                     $('.content-header__library-source-wrapper').removeClass("content-header__library-source-wrapper_active");
                     $('.content-header__url-source-wrapper').addClass("content-header__url-source-wrapper_active");
                     $('#current-source').html("Source: Playlist URL");
+                    $(this).find('.dropdown-content').removeClass('dropdown-content_active');
+                    $('.main-section__playlists-list').addClass("main-section__playlists-list_hidden");
+                    $('.main-section__songs').addClass('main-section__songs_only');
                     break;
                 }
             default:
 
         }
-
     })
-    $('.content-header__library-source').click(function() {
+    $('.content-header__library-source').click(function(event) {
         $('.content-header__library-source').removeClass("content-header__library-source_active");
         $(this).addClass("content-header__library-source_active");
+        switch (this.id) {
+            case "choose-playlists":
+            case "choose-albums":
+                {
+                    $('.main-section__playlists-list').removeClass("main-section__playlists-list_hidden");
+                    $('.main-section__songs').removeClass('main-section__songs_only');
+                    break;
+                }
+            case "choose-songs":
+                {
+                    $('.main-section__playlists-list').addClass("main-section__playlists-list_hidden");
+                    $('.main-section__songs').addClass('main-section__songs_only');
+                    break;
+                }
+            default:
+
+        }
     })
 })

@@ -1,3 +1,13 @@
+$primary-dark: #09340E;
+$primary-light: #157A21;
+$secondary-dark: #062309;
+$secondary-light: #0C4613;
+$grey-dark: #1F1F1F;
+$grey-light: #292929;
+$font-stack: Roboto, sans-serif;
+$header-text-color: #FFF;
+$secondary-text-color: #C2C2C2;
+
 * {
     padding: 0;
     margin: 0;
@@ -7,16 +17,12 @@ a {
     text-decoration: none;
 }
 
+body {}
+
 .container {
     max-width: 1020px;
     margin: auto;
 }
-$primary-dark: #09340E;
-$primary-light: #157A21;
-$secondary-dark: #062309;
-$secondary-light: #0C4613;
-$font-stack: Roboto, sans-serif;
-$header-text-color: #FFF;
 
 .header {
     background-image: linear-gradient(to right, $primary-dark, $primary-light, $primary-dark);
@@ -64,6 +70,9 @@ $header-text-color: #FFF;
     cursor: pointer;
 }
 
+.dropdown-content {
+  z-index: 9999;
+}
 .dropdown::after {
     content: '';
     width: 20px;
@@ -261,5 +270,102 @@ $header-text-color: #FFF;
 
     &:focus {
         outline-width: 0;
+    }
+}
+
+.main-section {
+    background-image: linear-gradient(to bottom, $secondary-dark,black);
+    background-repeat: no-repeat;
+    height: 1000px;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-section__playlists-list {
+    width: 320px;
+    position: absolute;
+    left: 0;
+    transition: 0.5s;
+}
+
+.main-section__playlists-list_hidden {
+    left: -320px;
+}
+
+.main-section__playlist-summary {
+    display: flex;
+    height: 60px;
+    padding: 5px;
+    margin-bottom: 2px;
+    background-color: $grey-light;
+
+    &:hover {
+        background-color: $grey-dark;
+        cursor: pointer;
+    }
+}
+
+.main-section__playlist-summary_active {
+    background-color: $grey-dark;
+    margin: 2px 2px 4px;
+}
+
+.main-section__playlist-cover {
+    height: 60px;
+}
+
+.main-section__playlist-text {
+    padding: 5px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.main-section__playlist-name {
+    color: $header-text-color;
+    font: 300 14pt $font-stack;
+}
+
+.main-section__playlist-author {
+    color: $secondary-text-color;
+    font: 300 12pt $font-stack;
+}
+
+.main-section__songs {
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1020px-320px-10px;
+    transition: 0.5s;
+}
+
+.main-section__songs_only {
+    position: absolute;
+    right: 0;
+    width: 1020px-10px;
+}
+
+.main-section__songs-list {
+    width: 100%;
+    border-collapse: collapse;
+
+    td {
+        color: $header-text-color;
+        font: 300 12pt $font-stack;
+        text-align: left;
+        padding: 5px;
+    }
+
+    th {
+        color: $secondary-text-color;
+        font: 300 12pt $font-stack;
+        text-align: left;
+        padding: 5px;
+    }
+
+    tr:not(:first-child):hover {
+        background-color: $grey-light;
+        cursor: pointer;
     }
 }

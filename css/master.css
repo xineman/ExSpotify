@@ -54,6 +54,9 @@ a {
   position: relative;
   cursor: pointer; }
 
+.dropdown-content {
+  z-index: 9999; }
+
 .dropdown::after {
   content: '';
   width: 20px; }
@@ -253,3 +256,97 @@ a {
   cursor: pointer; }
   .content-header__url-button:focus {
     outline-width: 0; }
+
+.main-section {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#062309), to(black));
+  background-image: -webkit-linear-gradient(top, #062309, black);
+  background-image: linear-gradient(to bottom, #062309, black);
+  background-repeat: no-repeat;
+  height: 1000px;
+  position: relative;
+  overflow: hidden; }
+
+.main-section__playlists-list {
+  width: 320px;
+  position: absolute;
+  left: 0;
+  -webkit-transition: 0.5s;
+  transition: 0.5s; }
+
+.main-section__playlists-list_hidden {
+  left: -320px; }
+
+.main-section__playlist-summary {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  height: 60px;
+  padding: 5px;
+  margin-bottom: 2px;
+  background-color: #292929; }
+  .main-section__playlist-summary:hover {
+    background-color: #1F1F1F;
+    cursor: pointer; }
+
+.main-section__playlist-summary_active {
+  background-color: #1F1F1F;
+  margin: 2px 2px 4px; }
+
+.main-section__playlist-cover {
+  height: 60px; }
+
+.main-section__playlist-text {
+  padding: 5px;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center; }
+
+.main-section__playlist-name {
+  color: #FFF;
+  font: 300 14pt Roboto, sans-serif; }
+
+.main-section__playlist-author {
+  color: #C2C2C2;
+  font: 300 12pt Roboto, sans-serif; }
+
+.main-section__songs {
+  padding: 5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 690px;
+  -webkit-transition: 0.5s;
+  transition: 0.5s; }
+
+.main-section__songs_only {
+  position: absolute;
+  right: 0;
+  width: 1010px; }
+
+.main-section__songs-list {
+  width: 100%;
+  border-collapse: collapse; }
+  .main-section__songs-list td {
+    color: #FFF;
+    font: 300 12pt Roboto, sans-serif;
+    text-align: left;
+    padding: 5px; }
+  .main-section__songs-list th {
+    color: #C2C2C2;
+    font: 300 12pt Roboto, sans-serif;
+    text-align: left;
+    padding: 5px; }
+  .main-section__songs-list tr:not(:first-child):hover {
+    background-color: #292929;
+    cursor: pointer; }
