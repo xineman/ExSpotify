@@ -68,17 +68,21 @@
                 <div class="content-header__source-options">
                     <div class="content-header__library-source-wrapper content-header__library-source-wrapper_active">
                         <ul>
-                            <li id="choose-playlists" class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
+                            <li id="choose-playlists" class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</li>
                             <li id="choose-albums" class="content-header__nav-item content-header__library-source">Albums</li>
                             <li id="choose-songs" class="content-header__nav-item content-header__library-source">Songs</li>
                             <li id="choose-url" class="content-header__nav-item content-header__library-source">URL</li>
                         </ul>
                     </div>
-                    <form class="content-header__url-source-wrapper">
+                    <form class="content-header__url-source-wrapper transition">
                         <input class="content-header__url-input" type="text" name="playlist-url" value="" placeholder="Playlist url">
                         <a id="open-url-btn" class="content-header__url-button">Open</a>
                         <a id="cancel-url-btn" class="content-header__url-button">Cancel</a>
                     </form>
+                    <div class="content-header__url-playlist-wrapper">
+                        <h3 class="content-header__nav-item content-header__url-playlist-name">Playlist name</h3>
+                        <a id="back-url-btn" class="content-header__url-button">Back</a>
+                    </div>
                 </div>
                 <div class="flex-item">
                     <a class="content-header__nav-item content-header__go-btn" href="#">Go!</a>

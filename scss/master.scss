@@ -231,6 +231,30 @@ body {}
 
 .content-header__url-source-wrapper {
     display: flex;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    transform: translate(0, -50%);
+    top: 150%;
+}
+
+.transition {
+    transition: 0.5s;
+}
+
+.content-header__url-source-wrapper_active {
+    top: 50%;
+}
+
+.content-header__url-source-wrapper_hidden-upper {
+    top: -50%;
+}
+
+.content-header__url-playlist-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     left: 0;
     right: 0;
@@ -239,10 +263,12 @@ body {}
     transition: 0.5s;
 }
 
-.content-header__url-source-wrapper_active {
-    display: flex;
-    align-items: center;
+.content-header__url-playlist-wrapper_active {
     top: 50%;
+}
+
+.content-header__url-playlist-name {
+    margin-right: 10px;
 }
 
 .content-header__url-input {
