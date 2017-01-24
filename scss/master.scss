@@ -71,8 +71,9 @@ body {}
 }
 
 .dropdown-content {
-  z-index: 9999;
+    z-index: 9999;
 }
+
 .dropdown::after {
     content: '';
     width: 20px;
@@ -198,7 +199,9 @@ body {}
     color: $header-text-color;
     font: 200 18pt $font-stack;
 }
-
+.content-header__library-source {
+  cursor: pointer;
+}
 .content-header__library-source_active {
     text-decoration: underline;
 }
@@ -294,10 +297,16 @@ body {}
 
 .main-section__playlist-summary {
     display: flex;
+    align-items: center;
     height: 60px;
     padding: 5px;
     margin-bottom: 2px;
     background-color: $grey-light;
+    transition: margin 0.1s;
+
+    &:first-child {
+        margin-top: 2px;
+    }
 
     &:hover {
         background-color: $grey-dark;
@@ -307,7 +316,7 @@ body {}
 
 .main-section__playlist-summary_active {
     background-color: $grey-dark;
-    margin: 2px 2px 4px;
+    margin: 0 3px 2px;
 }
 
 .main-section__playlist-cover {
@@ -329,6 +338,11 @@ body {}
 .main-section__playlist-author {
     color: $secondary-text-color;
     font: 300 12pt $font-stack;
+}
+
+.main-section__playlists-checkbox {
+    margin-left: auto;
+    //TODO Style checkbox there
 }
 
 .main-section__songs {

@@ -59,7 +59,7 @@
                             <div class="content-header__dropdown-content dropdown-content">
                                 <ul class="content-header__dropdown-options">
                                     <li id="choose-library" class="content-header__dropdown-item">Library</li>
-                                    <li id="choose-url" class="content-header__dropdown-item">Playlist URL</li>
+                                    <li id="choose-url" class="content-header__dropdown-item">URL</li>
                                 </ul>
                             </div>
                         </div>
@@ -68,9 +68,10 @@
                 <div class="content-header__source-options">
                     <div class="content-header__library-source-wrapper content-header__library-source-wrapper_active">
                         <ul>
-                            <li><a id="choose-playlists" class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
-                            <li><a id="choose-albums" class="content-header__nav-item content-header__library-source" href="#">Albums</a></li>
-                            <li><a id="choose-songs" class="content-header__nav-item content-header__library-source" href="#">Songs</a></li>
+                            <li id="choose-playlists" class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
+                            <li id="choose-albums" class="content-header__nav-item content-header__library-source">Albums</li>
+                            <li id="choose-songs" class="content-header__nav-item content-header__library-source">Songs</li>
+                            <!-- <li id="choose-url" class="content-header__nav-item content-header__library-source">URL</li> -->
                         </ul>
                     </div>
                     <form class="content-header__url-source-wrapper">
@@ -91,6 +92,7 @@
                         <h3 class="main-section__playlist-name">First</h3>
                         <h4 class="main-section__playlist-author">by Spotify</h4>
                     </div>
+                    <input class="main-section__playlists-checkbox" type="checkbox" />
                 </div>
                 <div class="main-section__playlist-summary">
                     <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
@@ -98,6 +100,7 @@
                         <h3 class="main-section__playlist-name">Second</h3>
                         <h4 class="main-section__playlist-author">by Spotify</h4>
                     </div>
+                    <input class="main-section__playlists-checkbox" type="checkbox" />
                 </div>
                 <div class="main-section__playlist-summary">
                     <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
@@ -105,6 +108,7 @@
                         <h3 class="main-section__playlist-name">Third</h3>
                         <h4 class="main-section__playlist-author">by Spotify</h4>
                     </div>
+                    <input class="main-section__playlists-checkbox" type="checkbox" />
                 </div>
                 <div class="main-section__playlist-summary">
                     <img class="main-section__playlist-cover" src="img/album art.jpg" alt="Album cover">
@@ -112,6 +116,7 @@
                         <h3 class="main-section__playlist-name">Forth</h3>
                         <h4 class="main-section__playlist-author">by Spotify</h4>
                     </div>
+                    <input class="main-section__playlists-checkbox" type="checkbox" />
                 </div>
             </aside>
             <section class="main-section__songs">
@@ -123,12 +128,19 @@
                         <th>Album</th>
                         <th>Duration</th>
                     </tr>
-                    <tr>
-                        <td><input type="checkbox" /></td>
+                    <tr class="main-section__song-row">
+                        <td><input id="input" class="main-section__song-checkbox" type="checkbox" /></td>
                         <td>Lose Yourself</td>
                         <td>Eminem</td>
                         <td>8 Mile</td>
                         <td>5:21</td>
+                    </tr>
+                    <tr class="main-section__song-row">
+                        <td><input id="input" class="main-section__song-checkbox" type="checkbox" /></td>
+                        <td>Shape of you</td>
+                        <td>Ed Sheeran</td>
+                        <td>Single</td>
+                        <td>3:53</td>
                     </tr>
                 </table>
             </section>

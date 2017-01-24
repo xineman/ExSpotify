@@ -65,5 +65,43 @@ $(document).ready(function() {
             default:
 
         }
-    })
+    });
+    $('.main-section__playlist-summary').click(function(event) {
+        $('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
+        $(this).addClass('main-section__playlist-summary_active');
+    });
+    $('.main-section__song-row').click(function(event) {
+        $(this).find('.main-section__song-checkbox').trigger('change');
+    });
+    $('.main-section__song-checkbox').change(function(event) {
+        if ($(this).is(':checked')) {
+            $(this).prop('checked', false);
+            if (!$('.main-section__songs').hasClass('main-section__songs_only'))
+                $('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', false);
+        } else {
+            $(this).prop("checked", true);
+            if (!$('.main-section__songs').hasClass('main-section__songs_only') && isAllSongsChecked())
+                $('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', true);
+        }
+    });
+    $('.main-section__playlists-checkbox').click(function(event) {
+        event.stopPropagation();
+    });
+    $('.main-section__playlists-checkbox').change(function(event) {
+        if ($(this).parent().hasClass('main-section__playlist-summary_active'))
+            if ($(this).prop("checked"))
+                $('.main-section__song-checkbox').prop("checked", true);
+            else $('.main-section__song-checkbox').prop("checked", false);
+    });
 })
+
+function isAllSongsChecked() {
+    var isTrue = true;
+    $songs = $('.main-section__song-checkbox');
+    $songs.each(function() {
+        if (!$(this).prop("checked")) {
+            return isTrue = false;
+        }
+    })
+    return isTrue;
+}
