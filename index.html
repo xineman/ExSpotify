@@ -6,48 +6,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExSpotify - Export your Spotify library to anywhere!</title>
     <link rel="stylesheet" href="css/master.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </head>
 
 <body>
     <header class="header">
-        <div class="container">
-
-            <nav class="header__nav">
-                <ul class="header__navigation_left">
-                    <li>
-                        <a href="#"><h1 class="header__title">ExSpotify</h1></a>
-                    </li>
-                    <li><a class="header__nav-item" href="#">Help</a></li>
-                    <li>
-                        <div class="header__services-dropdown dropdown">
-                            <div class="header__dropdown-title">
-                                <p class="header__nav-item">Services</p>
-                                <div class="header__dropdown-arrow"></div>
-                            </div>
-                            <div class="header__dropdown-content">
-                                <ul class="header__dropdown-options">
-                                    <li><a class="header__dropdown-item" href="#">Google Play Music</a></li>
-                                    <li><a class="header__dropdown-item" href="#">VK</a></li>
-                                </ul>
-                            </div>
+        <div class="header__nav container">
+            <ul class="header__navigation_left">
+                <li>
+                    <a href="#"><h1 class="header__title">ExSpotify</h1></a>
+                </li>
+                <li><a class="header__nav-item" href="#">Help</a></li>
+                <li>
+                    <div class="header__services-dropdown dropdown">
+                        <div class="header__dropdown-title dropdown-title">
+                            <p class="header__nav-item">Services</p>
+                            <div class="header__dropdown-arrow dropdown-arrow"></div>
                         </div>
-                    </li>
-                </ul>
-                <div class="header__navigation_right header__nickname-dropdown dropdown">
-                    <div class="header__dropdown-title">
-                        <img class="header__profile-picture" src="img/avatar.jpg" alt="Your photo">
-                        <p class="header__nav-item">Nickname</p>
-                        <div class="header__dropdown-arrow"></div>
+                        <div class="header__dropdown-content dropdown-content">
+                            <ul class="header__dropdown-options">
+                                <li><a class="header__dropdown-item" href="#">Google Play Music</a></li>
+                                <li><a class="header__dropdown-item" href="#">VK</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="header__dropdown-content">
-                        <ul class="header__dropdown-options">
-                            <li><a class="header__dropdown-item" href="#">Settings</a></li>
-                            <li><a class="header__dropdown-item" href="#">Logout</a></li>
-                        </ul>
+                </li>
+            </ul>
+            <div class="header__navigation_right header__nickname-dropdown dropdown">
+                <div class="header__dropdown-title dropdown-title">
+                    <img class="header__profile-picture" src="img/avatar.jpg" alt="Your photo">
+                    <p class="header__nav-item">Nickname</p>
+                    <div class="header__dropdown-arrow dropdown-arrow"></div>
+                </div>
+                <div class="header__dropdown-content dropdown-content">
+                    <ul class="header__dropdown-options">
+                        <li><a class="header__dropdown-item" href="#">Settings</a></li>
+                        <li><a class="header__dropdown-item" href="#">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <header class="content-header">
+        <div class="header__nav container">
+            <div class="flex-item">
+                <div class="content-header__source-wrapper">
+                    <div id="content-header__source-dropdown" class="content-header__source-dropdown dropdown">
+                        <div class="content-header__dropdown-title dropdown-title">
+                            <p id="current-source" class="content-header__nav-item">Source: Library</p>
+                            <div class="header__dropdown-arrow dropdown-arrow"></div>
+                        </div>
+                        <div id="div" class="content-header__dropdown-content dropdown-content">
+                            <ul id="ul" class="content-header__dropdown-options">
+                                <li id="choose-library"><a id="choose-library-a" class="content-header__dropdown-item" href="#">Library</a></li>
+                                <li id="choose-url"><a id="choose-url-a" class="content-header__dropdown-item" href="#">Playlist URL</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </nav>
+            </div>
+            <div class="content-header__source-options">
+                <div class="content-header__library-source-wrapper content-header__library-source-wrapper_active">
+                    <ul>
+                        <li><a class="content-header__nav-item content-header__library-source content-header__library-source_active" href="#">Playlists</a></li>
+                        <li><a class="content-header__nav-item content-header__library-source" href="#">Albums</a></li>
+                        <li><a class="content-header__nav-item content-header__library-source" href="#">Songs</a></li>
+                    </ul>
+                </div>
+                <form class="content-header__url-source-wrapper">
+                    <input class="content-header__url-input" type="text" name="playlist-url" value="" placeholder="Playlist url">
+                    <a class="content-header__url-button">Open</a>
+                </form>
+            </div>
+            <div class="flex-item">
+                <a class="content-header__nav-item content-header__go-btn" href="#">Go!</a>
+            </div>
+
         </div>
     </header>
     <script type="text/javascript" src="js/jquery-3.1.1.min.js">

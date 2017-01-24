@@ -13,6 +13,8 @@ a {
 }
 $primary-dark: #09340E;
 $primary-light: #157A21;
+$secondary-dark: #062309;
+$secondary-light: #0C4613;
 $font-stack: Roboto, sans-serif;
 $header-text-color: #FFF;
 
@@ -34,6 +36,10 @@ $header-text-color: #FFF;
     li {
         display: inline;
         padding-right: 20px;
+    }
+
+    li:last-child {
+        padding: 0;
     }
 }
 
@@ -58,36 +64,33 @@ $header-text-color: #FFF;
     cursor: pointer;
 }
 
+.dropdown::after {
+    content: '';
+    width: 20px;
+}
+
 .header__services-dropdown {}
 
 .header__nickname-dropdown {}
 
 .header__dropdown-title {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .header__profile-picture {
-  height: 35px;
-  border-radius: 25px;
-  margin-right: 10px;
+    height: 35px;
+    border-radius: 25px;
+    margin-right: 10px;
 }
 
 .header__dropdown-arrow {
     position: absolute;
     top: 15px;
-    right: -20px;
+    right: 0;
     width: 20px;
     height: 20px;
     background-color: transparent;
-
-    &.header__dropdown-arrow_active::after {
-        transform: rotate(-45deg);
-    }
-
-    &.header__dropdown-arrow_active::before {
-        transform: rotate(45deg);
-    }
 }
 
 .header__dropdown-arrow::after,
@@ -111,30 +114,152 @@ $header-text-color: #FFF;
     transform: rotate(135deg);
 }
 
+.dropdown-arrow_active::after {
+    transform: rotate(-45deg);
+}
+
+.dropdown-arrow_active::before {
+    transform: rotate(45deg);
+}
+
 .header__dropdown-content {
     position: absolute;
     top: 50px;
-    left: 0;
+    left: -10px;
     min-width: 200px;
-    background-color: #09340E;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: $secondary-dark;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     display: none;
 
     li {
         display: block;
-        padding: 10px 5px 0 5px;
+        padding: 10px 10px 0;
     }
 
     li:last-child {
-        padding: 10px 5px 5px 5px;
+        padding: 10px;
     }
+}
 
-    &.header__dropdown-content_active {
-        display: block;
-    }
+.dropdown-content_active {
+    display: block;
 }
 
 .header__dropdown-item {
     color: $header-text-color;
-    font: 12pt $font-stack;
+    font: 300 14pt $font-stack;
+}
+
+.content-header {
+    padding-top: 50px;
+    background-image: linear-gradient(to right, $secondary-dark, $secondary-light, $secondary-dark);
+    width: 100%;
+}
+
+.content-header__nav {}
+
+.flex-item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.content-header__nav-item {
+    color: $header-text-color;
+    font: 300 18pt $font-stack;
+    height: 50px;
+    line-height: 50px;
+    display: inline-block;
+}
+
+.content-header__source-wrapper {
+    margin-right: auto;
+}
+
+.content-header__go-btn {
+    margin-left: auto;
+}
+
+.content-header__dropdown-content {
+    @extend .header__dropdown-content;
+    background-color: $secondary-dark;
+}
+
+.content-header__dropdown-item {
+    color: $header-text-color;
+    font: 200 18pt $font-stack;
+}
+
+.content-header__library-source_active {
+    text-decoration: underline;
+}
+
+.content-header__source-options {
+    position: relative;
+    height: 50px;
+    width: 500px;
+    overflow: hidden;
+}
+
+.content-header__library-source-wrapper {
+    @extend .header__navigation_left;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    transition: 0.5s;
+    text-align: center;
+}
+
+.content-header__library-source-wrapper_active {
+    bottom: 0;
+}
+
+.content-header__url-source-wrapper {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    transform: translate(0, -50%);
+    top: 150%;
+    transition: 0.5s;
+}
+
+.content-header__url-source-wrapper_active {
+    display: flex;
+    align-items: center;
+    top: 50%;
+}
+
+.content-header__url-input {
+    background-color: transparent;
+    border: 1px solid $secondary-dark;
+    border-radius: 5px;
+    color: $header-text-color;
+    font: 300 14pt $font-stack;
+    height: 30px;
+    width: 100%;
+    margin-right: 10px;
+    padding: 0 5px;
+
+    &:focus {
+        outline-width: 0;
+    }
+}
+
+.content-header__url-button {
+    display: block;
+    background-color: transparent;
+    border: 1px solid $secondary-dark;
+    border-radius: 5px;
+    color: $header-text-color;
+    font: 300 14pt $font-stack;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    cursor: pointer;
+
+    &:focus {
+        outline-width: 0;
+    }
 }
