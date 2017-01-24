@@ -181,6 +181,9 @@ a {
   color: #FFF;
   font: 200 18pt Roboto, sans-serif; }
 
+.content-header__library-source {
+  cursor: pointer; }
+
 .content-header__library-source_active {
   text-decoration: underline; }
 
@@ -253,7 +256,10 @@ a {
   height: 30px;
   line-height: 30px;
   padding: 0 10px;
-  cursor: pointer; }
+  cursor: pointer;
+  margin-right: 5px; }
+  .content-header__url-button:last-child {
+    margin: 0; }
   .content-header__url-button:focus {
     outline-width: 0; }
 
@@ -281,17 +287,25 @@ a {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   height: 60px;
   padding: 5px;
   margin-bottom: 2px;
-  background-color: #292929; }
+  background-color: #292929;
+  -webkit-transition: margin 0.1s;
+  transition: margin 0.1s; }
+  .main-section__playlist-summary:first-child {
+    margin-top: 2px; }
   .main-section__playlist-summary:hover {
     background-color: #1F1F1F;
     cursor: pointer; }
 
 .main-section__playlist-summary_active {
   background-color: #1F1F1F;
-  margin: 2px 2px 4px; }
+  margin: 0 3px 2px; }
 
 .main-section__playlist-cover {
   height: 60px; }
@@ -319,6 +333,9 @@ a {
 .main-section__playlist-author {
   color: #C2C2C2;
   font: 300 12pt Roboto, sans-serif; }
+
+.main-section__playlists-checkbox {
+  margin-left: auto; }
 
 .main-section__songs {
   padding: 5px;
