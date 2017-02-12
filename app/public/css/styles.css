@@ -1,0 +1,665 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: inherit;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#062309), to(black));
+  background-image: -webkit-linear-gradient(top, #062309, black);
+  background-image: linear-gradient(to bottom, #062309, black);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1024px;
+  margin: auto;
+}
+
+.header {
+  background-image: -webkit-gradient(linear, left top, right top, from(#09340E), color-stop(#157A21), to(#09340E));
+  background-image: -webkit-linear-gradient(left, #09340E, #157A21, #09340E);
+  background-image: linear-gradient(to right, #09340E, #157A21, #09340E);
+  position: fixed;
+  width: 100%;
+  z-index: 9999;
+}
+
+.header__nav {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.header__navigation_left,
+.content-header__library-source-wrapper {
+  list-style-type: none;
+}
+
+.header__navigation_left li,
+.content-header__library-source-wrapper li {
+  display: inline;
+  padding-right: 20px;
+}
+
+.header__navigation_left li:last-child,
+.content-header__library-source-wrapper li:last-child {
+  padding: 0;
+}
+
+.header__title {
+  font: 20pt Roboto, sans-serif;
+  color: #FFF;
+  display: inline-block;
+}
+
+.header__nav-item,
+.main-section__status-message,
+.main-section__playlists-status {
+  color: #FFF;
+  font: 16pt Roboto, sans-serif;
+  height: 50px;
+  line-height: 50px;
+}
+
+.dropdown {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  z-index: 9999;
+}
+
+.dropdown::after {
+  content: '';
+  width: 20px;
+}
+
+.header__dropdown-title {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.header__profile-picture-wrapper {
+  height: 35px;
+  width: 35px;
+  -webkit-border-radius: 25px;
+  border-radius: 25px;
+  margin-right: 10px;
+  background-position: center;
+  /* Make the background image cover the area of the <div>, and clip the excess */
+  background-size: cover;
+}
+
+.header__profile-picture {
+  height: 35px;
+}
+
+.header__dropdown-arrow {
+  position: absolute;
+  top: 15px;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+}
+
+.header__dropdown-arrow::after,
+.header__dropdown-arrow::before {
+  position: absolute;
+  content: '';
+  width: 8px;
+  height: 3px;
+  top: 10px;
+  background-color: #fff;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+}
+
+.header__dropdown-arrow::after {
+  left: 4px;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.header__dropdown-arrow::before {
+  right: 4px;
+  -webkit-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  transform: rotate(135deg);
+}
+
+.dropdown-arrow_active::after {
+  -webkit-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.dropdown-arrow_active::before {
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.header__dropdown-content,
+.content-header__dropdown-content {
+  position: absolute;
+  top: 50px;
+  left: -10px;
+  min-width: 200px;
+  background-color: #062309;
+  -webkit-box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  display: none;
+}
+
+.header__dropdown-content li,
+.content-header__dropdown-content li {
+  display: block;
+  padding: 10px 10px 0;
+}
+
+.header__dropdown-content li:last-child,
+.content-header__dropdown-content li:last-child {
+  padding: 10px;
+}
+
+.dropdown-content_active {
+  display: block;
+}
+
+.header__dropdown-item {
+  color: #FFF;
+  font: 300 14pt Roboto, sans-serif;
+}
+
+.header__login-btn_hidden {
+  display: none;
+}
+
+.header__nickname-dropdown_hidden {
+  display: none;
+}
+
+#react-app {
+  height: 100%;
+}
+
+#react-container {
+  height: 100%;
+}
+
+.main {
+  height: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.content-header {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+  padding-top: 50px;
+  background-image: -webkit-gradient(linear, left top, right top, from(#062309), color-stop(#0C4613), to(#062309));
+  background-image: -webkit-linear-gradient(left, #062309, #0C4613, #062309);
+  background-image: linear-gradient(to right, #062309, #0C4613, #062309);
+  width: 100%;
+}
+
+.flex-item {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.content-header__nav-item {
+  color: #FFF;
+  font: 300 18pt Roboto, sans-serif;
+  height: 50px;
+  line-height: 50px;
+  display: inline-block;
+}
+
+.content-header__source-wrapper {
+  margin-right: auto;
+}
+
+.content-header__go-btn {
+  margin-left: auto;
+}
+
+.content-header__dropdown-content {
+  background-color: #062309;
+}
+
+.content-header__dropdown-item {
+  color: #FFF;
+  font: 200 18pt Roboto, sans-serif;
+}
+
+.content-header__library-source {
+  cursor: pointer;
+}
+
+.content-header__library-source_active {
+  text-decoration: underline;
+}
+
+.content-header__source-options {
+  position: relative;
+  height: 50px;
+  width: 500px;
+  overflow: hidden;
+}
+
+.content-header__library-source-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+  text-align: center;
+}
+
+.content-header__library-source-wrapper_active {
+  bottom: 0;
+}
+
+.content-header__url-source-wrapper {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  -webkit-transform: translate(0, -50%);
+  -ms-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  top: 50%;
+}
+
+.transition {
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+
+.content-header__url-source-wrapper_hidden-below {
+  top: 150%;
+}
+
+.content-header__url-source-wrapper_hidden-above {
+  top: -50%;
+}
+
+.content-header__url-playlist-wrapper {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  -webkit-transform: translate(0, -50%);
+  -ms-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  top: 50%;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+
+.content-header__url-playlist-wrapper_hidden {
+  top: 150%;
+}
+
+.content-header__url-playlist-name {
+  margin-right: 10px;
+}
+
+.content-header__url-input {
+  background-color: transparent;
+  border: 1px solid #062309;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  color: #FFF;
+  font: 300 14pt Roboto, sans-serif;
+  height: 30px;
+  width: 100%;
+  margin-right: 10px;
+  padding: 0 5px;
+}
+
+.content-header__url-input:focus {
+  outline-width: 0;
+}
+
+.content-header__url-button {
+  display: block;
+  background-color: transparent;
+  border: 1px solid #062309;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  color: #FFF;
+  font: 300 14pt Roboto, sans-serif;
+  height: 30px;
+  line-height: 30px;
+  padding: 0 10px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.content-header__url-button:last-child {
+  margin: 0;
+}
+
+.content-header__url-button:focus {
+  outline-width: 0;
+}
+
+.main-section {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  position: relative;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.main-section__playlists-list {
+  width: 280px;
+  height: 100%;
+  overflow: auto;
+}
+
+.main-section__playlists-list_hidden {
+  width: 0;
+}
+
+.main-section__songs {
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 5px;
+  width: 734px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+
+.main-section__songs_only {
+  width: 1014px;
+}
+
+.main-section__playlist-summary {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 60px;
+  padding: 5px;
+  margin-bottom: 2px;
+  background-color: #292929;
+  -webkit-transition: 0.1s;
+  transition: 0.1s;
+  position: relative;
+}
+
+.main-section__playlist-summary:first-child {
+  margin-top: 2px;
+}
+
+.main-section__playlist-summary:hover {
+  background-color: #1F1F1F;
+  cursor: pointer;
+}
+
+.main-section__playlist-summary_active {
+  background-color: #1F1F1F;
+  padding: 5px;
+  padding-left: 9px;
+}
+
+.main-section__playlist-cover {
+  height: 60px;
+}
+
+.main-section__playlist-text {
+  padding: 5px;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.main-section__playlist-name {
+  color: #FFF;
+  font: 300 14pt Roboto, sans-serif;
+}
+
+.main-section__playlist-author {
+  color: #C2C2C2;
+  font: 300 12pt Roboto, sans-serif;
+}
+
+.main-section__playlists-checkbox {
+  display: none;
+}
+
+input[type=checkbox].css-checkbox + label.css-label {
+  margin-left: auto;
+  padding-left: 41px;
+  height: 36px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  cursor: pointer;
+}
+
+input[type=checkbox].css-checkbox:checked + label.css-label {
+  background-position: 0 -36px;
+}
+
+label.css-label {
+  background-image: url("http://csscheckbox.com/checkboxes/u/csscheckbox_5e67f778a4d9b72b5f87ea729418f5ce.png");
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.main-section__songs-list {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  white-space: nowrap;
+}
+
+.main-section__songs-list td {
+  color: #FFF;
+  font: 300 12pt Roboto, sans-serif;
+  text-align: left;
+  padding: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.main-section__songs-list th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #C2C2C2;
+  font: 300 12pt Roboto, sans-serif;
+  text-align: left;
+  padding: 5px;
+}
+
+.main-section__songs-list tr:not(:first-child):hover {
+  background-color: #292929;
+  cursor: pointer;
+}
+
+.main-section__check-col {
+  width: 20px;
+}
+
+.main-section__duration-col {
+  width: 30px;
+}
+
+.main-section__status-message {
+  min-width: 734px;
+  text-align: center;
+}
+
+.main-section__playlists-status {
+  width: 280px;
+  text-align: center;
+}
+/*!
+ * 
+ *             SimpleBar.js - v2.0.2
+ *             Scrollbars, simpler.
+ *             https://grsmto.github.io/simplebar/
+ *             
+ *             Made by Adrien Grsmto from a fork by Jonathan Nicol
+ *             Under MIT License
+ *         
+ */
+
+[data-simplebar] {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.simplebar-scroll-content {
+  overflow: auto;
+  position: relative;
+  z-index: 0;
+}
+
+.simplebar-track {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+}
+
+.simplebar-track .simplebar-scrollbar {
+  position: absolute;
+  right: 2px;
+  border-radius: 7px;
+  min-height: 10px;
+  width: 7px;
+  opacity: 0;
+  -webkit-transition: opacity .2s linear;
+  transition: opacity .2s linear;
+  background: #6c6e71;
+  background-clip: padding-box;
+}
+
+.simplebar-track:hover .simplebar-scrollbar {
+  opacity: .7;
+  -webkit-transition: opacity 0 linear;
+  transition: opacity 0 linear;
+}
+
+.simplebar-track .simplebar-scrollbar.visible {
+  opacity: .7;
+}
+
+.horizontal.simplebar-track {
+  top: auto;
+  left: 0;
+  width: auto;
+  height: 11px;
+}
+
+.horizontal.simplebar-track .simplebar-scrollbar {
+  right: auto;
+  top: 2px;
+  height: 7px;
+  min-height: 0;
+  min-width: 10px;
+  width: auto;
+}

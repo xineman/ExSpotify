@@ -7,20 +7,32 @@ $grey-light: #292929;
 $font-stack: Roboto, sans-serif;
 $header-text-color: #FFF;
 $secondary-text-color: #C2C2C2;
+$container-width: 1024;
 
 * {
     padding: 0;
     margin: 0;
 }
 
+html {
+    height: 100%;
+}
+
+body {
+    height: inherit;
+    background-image: linear-gradient(to bottom, $secondary-dark,black);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    // display: flex;
+    // flex-direction: column;
+}
+
 a {
     text-decoration: none;
 }
 
-body {}
-
 .container {
-    max-width: 1020px;
+    max-width: 1024px;
     margin: auto;
 }
 
@@ -88,10 +100,19 @@ body {}
     align-items: center;
 }
 
-.header__profile-picture {
+.header__profile-picture-wrapper {
     height: 35px;
+    width: 35px;
     border-radius: 25px;
     margin-right: 10px;
+    // background-image: url('../img/test.jpg');
+    background-position: center;
+    /* Make the background image cover the area of the <div>, and clip the excess */
+    background-size: cover;
+}
+
+.header__profile-picture {
+    height: 35px;
 }
 
 .header__dropdown-arrow {
@@ -160,7 +181,31 @@ body {}
     font: 300 14pt $font-stack;
 }
 
+.header__login-btn_hidden {
+    display: none;
+}
+
+.header__nickname-dropdown_hidden {
+    display: none;
+}
+
+#react-app {
+    // flex: 1 1 auto;
+    height: 100%;
+}
+
+#react-container {
+    height: 100%;
+}
+
+.main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .content-header {
+    flex: 0 1 auto;
     padding-top: 50px;
     background-image: linear-gradient(to right, $secondary-dark, $secondary-light, $secondary-dark);
     width: 100%;
@@ -236,18 +281,18 @@ body {}
     left: 0;
     right: 0;
     transform: translate(0, -50%);
-    top: 150%;
+    top: 50%;
 }
 
 .transition {
     transition: 0.5s;
 }
 
-.content-header__url-source-wrapper_active {
-    top: 50%;
+.content-header__url-source-wrapper_hidden-below {
+    top: 150%;
 }
 
-.content-header__url-source-wrapper_hidden-upper {
+.content-header__url-source-wrapper_hidden-above {
     top: -50%;
 }
 
@@ -259,12 +304,12 @@ body {}
     left: 0;
     right: 0;
     transform: translate(0, -50%);
-    top: 150%;
+    top: 50%;
     transition: 0.5s;
 }
 
-.content-header__url-playlist-wrapper_active {
-    top: 50%;
+.content-header__url-playlist-wrapper_hidden {
+    top: 150%;
 }
 
 .content-header__url-playlist-name {
@@ -310,32 +355,51 @@ body {}
 }
 
 .main-section {
-    background-image: linear-gradient(to bottom, $secondary-dark,black);
-    background-repeat: no-repeat;
-    height: 1000px;
+    flex: 1 1 auto;
     position: relative;
-    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    height: 100%;
 }
 
 .main-section__playlists-list {
-    width: 320px;
-    position: absolute;
-    left: 0;
-    transition: 0.5s;
+    width: 280px;
+    // position: absolute;
+    // top: 0;
+    // left: -280px;
+    // transition: 0.5s;
+    height: 100%;
+    overflow: auto;
 }
 
 .main-section__playlists-list_hidden {
-    left: -320px;
+    width: 0;
+}
+
+.main-section__songs {
+    max-height: 100%;
+    overflow-y: auto;
+    // overflow-x: hidden;
+    padding: 5px;
+    width: 1024px-10px-280px;
+    box-sizing: border-box;
+    transition: 0.5s;
+}
+
+.main-section__songs_only {
+    width: 1024px-10px;
 }
 
 .main-section__playlist-summary {
     display: flex;
     align-items: center;
     height: 60px;
+    // width: 270px;
     padding: 5px;
     margin-bottom: 2px;
     background-color: $grey-light;
-    transition: margin 0.1s;
+    transition: 0.1s;
+    position: relative;
 
     &:first-child {
         margin-top: 2px;
@@ -349,7 +413,9 @@ body {}
 
 .main-section__playlist-summary_active {
     background-color: $grey-dark;
-    margin: 0 3px 2px;
+    // width: 266px;
+    padding: 5px;
+    padding-left: 9px;
 }
 
 .main-section__playlist-cover {
@@ -374,37 +440,64 @@ body {}
 }
 
 .main-section__playlists-checkbox {
+    display: none;
+}
+
+// input[type=checkbox].css-checkbox {
+//     position: absolute;
+//     z-index: -1000;
+//     right: 40px;
+//     overflow: hidden;
+//     clip: rect(0 0 0 0);
+//     height: 1px;
+//     width: 1px;
+//     // margin: -1px;
+//     padding: 0;
+//     border: 0;
+// }
+
+input[type=checkbox].css-checkbox + label.css-label {
     margin-left: auto;
-    //TODO Style checkbox there
+    padding-left: 41px;
+    height: 36px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    cursor: pointer;
+    // display: inline-block;
+    // font-size: 36px;
+    // vertical-align: middle;
+    // line-height: 36px;
 }
 
-.main-section__songs {
-    padding: 5px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1020px-320px-10px;
-    transition: 0.5s;
+input[type=checkbox].css-checkbox:checked + label.css-label {
+    background-position: 0 -36px;
 }
 
-.main-section__songs_only {
-    position: absolute;
-    right: 0;
-    width: 1020px-10px;
+label.css-label {
+    background-image: url("http://csscheckbox.com/checkboxes/u/csscheckbox_5e67f778a4d9b72b5f87ea729418f5ce.png");
+    user-select: none;
 }
 
 .main-section__songs-list {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    white-space: nowrap;
 
     td {
         color: $header-text-color;
         font: 300 12pt $font-stack;
         text-align: left;
         padding: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     th {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         color: $secondary-text-color;
         font: 300 12pt $font-stack;
         text-align: left;
@@ -415,4 +508,31 @@ body {}
         background-color: $grey-light;
         cursor: pointer;
     }
+}
+.main-section__check-col {
+  width: 20px;
+}
+// .main-section__check-col {
+//   width: 40px;
+// }
+// .main-section__check-col {
+//   width: 40px;
+// }
+// .main-section__check-col {
+//   width: 40px;
+// }
+.main-section__duration-col {
+  width: 30px;
+}
+.main-section__status-message {
+    min-width: 1024px-280px-10px;
+    // width: 100%;
+    @extend .header__nav-item;
+    text-align: center;
+}
+.main-section__playlists-status {
+    width: 280px;
+    // width: 100%;
+    @extend .header__nav-item;
+    text-align: center;
 }
