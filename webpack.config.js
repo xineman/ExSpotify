@@ -5,7 +5,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 const config = {
 	entry: {
 		main: './app/public/js/app.js',
-		libs: ['jquery', 'react', 'react-dom', 'simplebar']
+		libs: ['jquery', 'react', 'react-dom']
 
 	},
 	output: {

@@ -25,7 +25,7 @@ gulp.task('sass', function() {
 });
 
 gulp.task('concat-css',['sass'], function () {
-  return gulp.src(['app/public/css/master.css', 'app/public/css/simplebar.css'])
+  return gulp.src(['app/public/css/scroll.css', 'app/public/css/master.css'])
     .pipe(concatCss("css/styles.css"))
     .pipe(gulp.dest('app/public/'));
 });

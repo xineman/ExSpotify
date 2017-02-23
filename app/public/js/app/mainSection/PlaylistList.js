@@ -1,6 +1,6 @@
-import { getCookie, refreshToken } from '../../utilities.js';
-// import CSSModules from 'react-css-modules';
-import SimpleBar from 'simplebar';
+import {getCookie, refreshToken} from '../../utilities.js';
+import CustomScroll from 'react-custom-scroll';
+import InfiniteScroll from 'react-infinite-scroller';
 export default class PlaylistList extends React.Component {
 	constructor() {
 		super();
@@ -10,10 +10,6 @@ export default class PlaylistList extends React.Component {
 	}
 
 	componentDidUpdate() {
-		if($('.main-section__playlists-list').length) {
-			// console.log($('.main-section__playlists-list').length);
-			new SimpleBar($('.main-section__playlists-list')[0]);
-		}
 		$('.main-section__playlist-summary').click(function(event) {
 			$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
 			$(this).addClass('main-section__playlist-summary_active');
@@ -50,11 +46,34 @@ export default class PlaylistList extends React.Component {
 		});
 	}
 
+	getUserAlbums() {
+		$.ajax({
+			url: `https://api.spotify.com/v1/me/albums`,
+			headers: {
+				'Authorization': 'Bearer ' + getCookie("access_token")
+			}
+		}).done((list) => {
+			this.props.setAlbumList(list);
+			// this.getPlaylist()
+			console.log("Loaded albums");
+			console.log(this.props.state);
+		}).fail((xhr, status, errorThrown) => {
+			refreshToken(() => this.getUserAlbums());
+			console.log("Error: " + errorThrown);
+			console.log("Status: " + status);
+			console.dir(xhr);
+		});
+	}
+
 	parsePlaylist(playlist, isActive) {
-	 	const index = this.props.state.library.playlistList.items.indexOf(playlist);
+		const index = this.props.state.library.playlistList.items.indexOf(playlist);
 		return (
-			<div key={playlist.id} className={"main-section__playlist-summary"+(isActive?" main-section__playlist-summary_active":"")} onClick={() => this.props.selectPlaylist(index)}>
-				<img className="main-section__playlist-cover" src={playlist.images.length?playlist.images[0].url:"img/album art.jpg"} alt="Album cover"/>
+			<div key={playlist.id} className={"main-section__playlist-summary" + (isActive
+				? " main-section__playlist-summary_active"
+				: "")} onClick={() => this.props.selectPlaylist(index)}>
+				<img className="main-section__playlist-cover" src={playlist.images.length
+					? playlist.images[0].url
+					: "img/album art.jpg"} alt="Album cover"/>
 				<div className="main-section__playlist-text">
 					<h3 className="main-section__playlist-name">{playlist.name}</h3>
 					<h4 className="main-section__playlist-author">by {playlist.owner.id}</h4>
@@ -72,25 +91,85 @@ export default class PlaylistList extends React.Component {
 				playlists.push(this.parsePlaylist(playlist, true));
 			} else
 				playlists.push(this.parsePlaylist(playlist));
-		}
+			}
 		return (
-			<aside className="main-section__playlists-list">
-				{playlists}
-			</aside>
+			<CustomScroll heightRelativeToParent="100%">
+				<aside ref="test" className="main-section__playlists-list">
+					{playlists}
+				</aside>
+			</CustomScroll>
 		)
 	}
-	//  styleName="simplebar"
+
+	parseAlbum(a, isActive) {
+		const index = this.props.state.library.albumList.items.indexOf(a);
+		let album = a.album;
+		return (
+			<div key={album.id} className={"main-section__playlist-summary" + (isActive
+				? " main-section__playlist-summary_active"
+				: "")} onClick={() => this.props.selectAlbum(index)}>
+				<img className="main-section__playlist-cover" src={album.images.length>2
+					? album.images[2].url
+					: album.images[0].url} alt="Album cover"/>
+				<div className="main-section__playlist-text">
+					<h3 className="main-section__playlist-name">{album.name}</h3>
+					<h4 className="main-section__playlist-author">{album.artists[0].name}</h4>
+				</div>
+				<input id={album.id} className="main-section__playlists-checkbox css-checkbox" type="checkbox"/>
+				<label className="main-section__playlists-checkbox-label css-label" htmlFor={album.id}></label>
+			</div>
+		);
+	}
+
+	renderAlbumList(albumList) {
+		var albums = [];
+		for (let album of albumList.items) {
+			if (albumList.items.indexOf(album) == 0) {
+				albums.push(this.parseAlbum(album, true));
+			} else
+				albums.push(this.parseAlbum(album));
+			}
+		return (
+			<CustomScroll heightRelativeToParent="100%">
+				<aside className="main-section__playlists-list">
+					{albums}
+				</aside>
+			</CustomScroll>
+		)
+	}
+
 	render() {
-		if (this.props.userId && this.props.state.library.playlistList==null)
-			this.getUserPlaylists();
-		if (this.props.state.library.playlistList)
-			return this.renderList(this.props.state.library.playlistList);
-		else
-			return (
-				<h3 className="main-section__playlists-status">
-					Loading playlists...
-				</h3>
-			);
+		switch (this.props.state.library.state) {
+			case "playlist":
+				if (this.props.state.library.playlistList == null) {
+					this.getUserPlaylists();
+					return (
+						<h3 className="main-section__playlists-status">
+							Loading playlists...
+						</h3>
+					);
+				}
+				return this.renderList(this.props.state.library.playlistList);
+				break;
+			case "album":
+				if (this.props.state.library.albumList == null) {
+					this.getUserAlbums();
+					return (
+						<h3 className="main-section__playlists-status">
+							Loading albums...
+						</h3>
+					);
+				}
+				return this.renderAlbumList(this.props.state.library.albumList);
+				// (
+				// 	<h3 className="main-section__playlists-status">
+				// 		Loaded albums
+				// 	</h3>
+				// );
+				//
+				break;
+
+		}
+
 	}
 }
-// CSSModules(PlaylistList, styles);

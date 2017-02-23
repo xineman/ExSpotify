@@ -36,8 +36,9 @@
     "jquery": "^3.1.1",
     "query-string": "^4.3.1",
     "react": "^15.4.2",
+    "react-custom-scroll": "^1.8.0",
     "react-dom": "^15.4.2",
-    "request": "^2.15.9",
-    "simplebar": "^2.0.3"
+    "react-infinite-scroller": "^1.0.7",
+    "request": "^2.15.9"
   }
 }

@@ -4,7 +4,7 @@ const path = require('path');
 const config = {
 	entry: {
 		main: path.resolve(__dirname, './public/js/app.js'),
-		libs: ['jquery', 'react', 'react-dom', 'simplebar']
+		libs: ['jquery', 'react', 'react-dom']
 	},
 	output: {
 		path: path.resolve(__dirname, './public/js'),

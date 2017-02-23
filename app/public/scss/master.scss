@@ -190,7 +190,6 @@ a {
 }
 
 #react-app {
-    // flex: 1 1 auto;
     height: 100%;
 }
 
@@ -265,13 +264,9 @@ a {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 100%;
+    bottom: 0;
     transition: 0.5s;
     text-align: center;
-}
-
-.content-header__library-source-wrapper_active {
-    bottom: 0;
 }
 
 .content-header__url-source-wrapper {
@@ -369,7 +364,7 @@ a {
     // left: -280px;
     // transition: 0.5s;
     height: 100%;
-    overflow: auto;
+    // overflow: auto;
 }
 
 .main-section__playlists-list_hidden {
@@ -377,8 +372,8 @@ a {
 }
 
 .main-section__songs {
-    max-height: 100%;
-    overflow-y: auto;
+    height: 100%;
+    // overflow-y: auto;
     // overflow-x: hidden;
     padding: 5px;
     width: 1024px-10px-280px;
@@ -504,7 +499,7 @@ label.css-label {
         padding: 5px;
     }
 
-    tr:not(:first-child):hover {
+    tbody tr:hover {
         background-color: $grey-light;
         cursor: pointer;
     }
@@ -535,4 +530,8 @@ label.css-label {
     // width: 100%;
     @extend .header__nav-item;
     text-align: center;
+}
+
+.main-section .inner-handle {
+  background-color: $secondary-text-color;
 }

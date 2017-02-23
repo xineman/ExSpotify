@@ -77,20 +77,32 @@ export default class MainSection extends React.Component {
 		this.setState({library: Object.assign({}, this.state.library, {state: source})});
 	}
 
+	setSavedSonglist(list) {
+		this.setState({library: Object.assign({}, this.state.library, {songlist: list})});
+	}
+
 	setPlaylistList(list) {
 		this.setState({library: Object.assign({}, this.state.library, {playlistList: list, selectedPlaylist: 0})});
+	}
+
+	setAlbumList(list) {
+		this.setState({library: Object.assign({}, this.state.library, {albumList: list, selectedAlbum: 0})});
 	}
 
 	setPlaylistSonglist(list) {
 		this.setState({library: Object.assign({}, this.state.library, {playlistSonglist: list})});
 	}
 
-	selectPlaylist(indexx) {
-		this.setState({library: Object.assign({}, this.state.library, {playlistSonglist: null, selectedPlaylist: indexx})});
+	setAlbumSonglist(list) {
+		this.setState({library: Object.assign({}, this.state.library, {albumSonglist: list})});
+	}
+
+	selectPlaylist(index) {
+		this.setState({library: Object.assign({}, this.state.library, {playlistSonglist: null, selectedPlaylist: index})});
 	}
 
 	selectAlbum(index) {
-		this.setState({library: Object.assign({}, this.state.library, {selectedAlbum: index})});
+		this.setState({library: Object.assign({}, this.state.library, {albumSonglist: null, selectedAlbum: index})});
 	}
 
 	parseUrl(event) {
@@ -144,7 +156,7 @@ export default class MainSection extends React.Component {
 						case "playlist":
 							return (<PlaylistList userId={this.props.userId} state={this.state} setPlaylistList={(list) => this.setPlaylistList(list)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
 						case "album":
-							return (<PlaylistList state={this.state}/>);
+							return (<PlaylistList state={this.state} setAlbumList={(list) => this.setAlbumList(list)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
 					}
 				default:
 			}
@@ -173,7 +185,14 @@ export default class MainSection extends React.Component {
 						return (<SongList state={this.state}/>);
 				}
 			case "library":
-				return (<SongList userId={this.props.userId} setPlaylistSonglist={(list) => this.setPlaylistSonglist(list)} state={this.state}/>);
+				switch (this.state.library.state) {
+					case "playlist":
+						return (<SongList userId={this.props.userId} setPlaylistSonglist={(list) => this.setPlaylistSonglist(list)} state={this.state}/>);
+					case "album":
+						return (<SongList userId={this.props.userId} setAlbumSonglist={(list) => this.setAlbumSonglist(list)} state={this.state}/>);
+					case "songs":
+						return (<SongList userId={this.props.userId} setSavedSonglist={(list) => this.setSavedSonglist(list)} state={this.state}/>);
+				}
 		}
 	}
 

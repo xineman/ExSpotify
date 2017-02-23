@@ -30,7 +30,7 @@ export default class LibrarySources extends React.Component {
 	}
 	render() {
 		return (
-			<div className="content-header__library-source-wrapper content-header__library-source-wrapper_active">
+			<div className="content-header__library-source-wrapper">
 				<ul>
 					<li id="choose-playlists" className={"content-header__nav-item content-header__library-source" + this.isActive("playlist")}>Playlists</li>
 					<li id="choose-albums" className={"content-header__nav-item content-header__library-source" + this.isActive("album")}>Albums</li>

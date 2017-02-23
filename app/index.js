@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const request = require('request');
-const querystring = require('query-string');
+const querystring = require('query-string'); //Edited
 const cookieParser = require('cookie-parser');
 var app = express();
 
@@ -55,7 +55,7 @@ app.get('/get-playlist', function(req, res) {
 });
 
 app.get('/login', function(req, res) {
-	var scope = 'user-read-private user-read-email';
+	var scope = 'user-read-private user-library-read';
 	var state = generateRandomString(16);
 	res.cookie(stateKey, state);
 	res.redirect('https://accounts.spotify.com/authorize?' + querystring.stringify({response_type: 'code', client_id: client_id, scope: scope, redirect_uri: redirect_uri, state: state}));
