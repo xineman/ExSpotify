@@ -55,10 +55,11 @@ gulp.task("watch",['concat-css'], ()=> {
 //PRODUCTION
 gulp.task('build', ['clean', 'index', 'min-css', 'webpack'], function() {
     gulp.src('app/public/img/*').pipe(gulp.dest('dist/public/img'));
+    gulp.src('app/index.js').pipe(gulp.dest('dist/'));
 });
 
 gulp.task('clean', function() {
-    return del.sync('dist/public');
+    return del.sync('dist');
 });
 
 //Bundle scripts using webpack

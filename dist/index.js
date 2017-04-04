@@ -8,8 +8,7 @@ var app = express();
 var requestOptions;
 var client_id = "779a5324d5774343973fd9601952154c";
 var client_secret = "d7497c8b635f490e8ad8d5e1df451e69";
-// var redirect_uri = "http://185.5.52.181:3000/callback";
-var redirect_uri = "http://localhost:3000/callback";
+var redirect_uri = "http://185.5.52.181:3000/callback";
 var stateKey = 'spotify_auth_state';
 
 var generateRandomString = function(length) {
@@ -23,15 +22,15 @@ var generateRandomString = function(length) {
 };
 
 //DEV
-var webpackDevMiddleware = require("webpack-dev-middleware");
-var webpack = require("webpack");
-var webpackConfig = require("./webpack.config");
-var compiler = webpack(webpackConfig);
-app.use(webpackDevMiddleware(compiler, {
-	contentBase: path.resolve(__dirname, "./public/"),
-	watchContentBase: true,
-	publicPath: "/js/" // Same as `output.publicPath` in most cases.
-}));
+// var webpackDevMiddleware = require("webpack-dev-middleware");
+// var webpack = require("webpack");
+// var webpackConfig = require("./webpack.config");
+// var compiler = webpack(webpackConfig);
+// app.use(webpackDevMiddleware(compiler, {
+// 	contentBase: path.resolve(__dirname, "./public/"),
+// 	watchContentBase: true,
+// 	publicPath: "/js/" // Same as `output.publicPath` in most cases.
+// }));
 //END DEV
 
 

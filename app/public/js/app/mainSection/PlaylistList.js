@@ -93,9 +93,18 @@ export default class PlaylistList extends React.Component {
 				playlists.push(this.parsePlaylist(playlist));
 			}
 		return (
-			<CustomScroll heightRelativeToParent="100%">
+			<CustomScroll heightRelativeToParent="100%" onScroll={() => console.log(document.getElementsByClassName('main-section__playlists-list')[0].scrollHeight)}>
+
 				<aside ref="test" className="main-section__playlists-list">
-					{playlists}
+					{/* <InfiniteScroll
+		        pageStart={0}
+		        loadMore={()=>console.log("Have to load")}
+		        hasMore={true}
+		        loader={<div className="loader">Loading ...</div>}
+		        useWindow={false}
+		    		> */}
+						{playlists}
+			    {/* </InfiniteScroll> */}
 				</aside>
 			</CustomScroll>
 		)
@@ -161,14 +170,7 @@ export default class PlaylistList extends React.Component {
 					);
 				}
 				return this.renderAlbumList(this.props.state.library.albumList);
-				// (
-				// 	<h3 className="main-section__playlists-status">
-				// 		Loaded albums
-				// 	</h3>
-				// );
-				//
 				break;
-
 		}
 
 	}
