@@ -364,7 +364,7 @@ a {
     // left: -280px;
     // transition: 0.5s;
     height: 100%;
-    // overflow: auto;
+    overflow-y: auto;
 }
 
 .main-section__playlists-list_hidden {
@@ -373,7 +373,7 @@ a {
 
 .main-section__songs {
     height: 100%;
-    // overflow-y: auto;
+    overflow-y: auto;
     // overflow-x: hidden;
     padding: 5px;
     width: 1024px-10px-280px;

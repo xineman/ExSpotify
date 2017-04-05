@@ -354,13 +354,15 @@ a {
 
 .main-section__playlists-list {
   width: 280px;
-  height: 100%; }
+  height: 100%;
+  overflow-y: auto; }
 
 .main-section__playlists-list_hidden {
   width: 0; }
 
 .main-section__songs {
   height: 100%;
+  overflow-y: auto;
   padding: 5px;
   width: 734px;
   -webkit-box-sizing: border-box;

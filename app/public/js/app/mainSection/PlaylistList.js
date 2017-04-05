@@ -1,4 +1,4 @@
-import {getCookie, refreshToken} from '../../utilities.js';
+import {getCookie, refreshToken, hasMore} from '../../utilities.js';
 import CustomScroll from 'react-custom-scroll';
 import InfiniteScroll from 'react-infinite-scroller';
 export default class PlaylistList extends React.Component {
@@ -27,38 +27,36 @@ export default class PlaylistList extends React.Component {
 			);
 	}
 
-	getUserPlaylists() {
+	getUserPlaylists(isAppend) {
 		$.ajax({
-			url: `https://api.spotify.com/v1/me/playlists`,
+			url: isAppend?this.props.state.library.playlistList.next:`https://api.spotify.com/v1/me/playlists`,
 			headers: {
 				'Authorization': 'Bearer ' + getCookie("access_token")
 			}
 		}).done((list) => {
-			this.props.setPlaylistList(list);
-			// this.getPlaylist()
+			this.props.setPlaylistList(list, isAppend);
 			console.log("Loaded playlists");
 			console.log(this.props.state);
 		}).fail((xhr, status, errorThrown) => {
-			refreshToken(() => this.getUserPlaylists());
+			refreshToken(() => this.getUserPlaylists(isAppend));
 			console.log("Error: " + errorThrown);
 			console.log("Status: " + status);
 			console.dir(xhr);
 		});
 	}
 
-	getUserAlbums() {
+	getUserAlbums(isAppend) {
 		$.ajax({
-			url: `https://api.spotify.com/v1/me/albums`,
+			url: isAppend?this.props.state.library.albumList.next:`https://api.spotify.com/v1/me/albums`,
 			headers: {
 				'Authorization': 'Bearer ' + getCookie("access_token")
 			}
 		}).done((list) => {
-			this.props.setAlbumList(list);
-			// this.getPlaylist()
+			this.props.setAlbumList(list, isAppend);
 			console.log("Loaded albums");
 			console.log(this.props.state);
 		}).fail((xhr, status, errorThrown) => {
-			refreshToken(() => this.getUserAlbums());
+			refreshToken(() => this.getUserAlbums(isAppend));
 			console.log("Error: " + errorThrown);
 			console.log("Status: " + status);
 			console.dir(xhr);
@@ -93,23 +91,22 @@ export default class PlaylistList extends React.Component {
 				playlists.push(this.parsePlaylist(playlist));
 			}
 		return (
-			<CustomScroll heightRelativeToParent="100%" onScroll={() => console.log(document.getElementsByClassName('main-section__playlists-list')[0].scrollHeight)}>
+			// <CustomScroll heightRelativeToParent="100%" onScroll={() => console.log(document.getElementsByClassName('main-section__playlists-list')[0].scrollHeight)}>
 
 				<aside ref="test" className="main-section__playlists-list">
-					{/* <InfiniteScroll
+					<InfiniteScroll
 		        pageStart={0}
-		        loadMore={()=>console.log("Have to load")}
-		        hasMore={true}
+		        loadMore={()=>this.getUserPlaylists(true)}
+		        hasMore={hasMore(this.props.state.library.playlistList)}
 		        loader={<div className="loader">Loading ...</div>}
 		        useWindow={false}
-		    		> */}
+		    		>
 						{playlists}
-			    {/* </InfiniteScroll> */}
+			    </InfiniteScroll>
 				</aside>
-			</CustomScroll>
+			// </CustomScroll>
 		)
 	}
-
 	parseAlbum(a, isActive) {
 		const index = this.props.state.library.albumList.items.indexOf(a);
 		let album = a.album;
@@ -139,11 +136,19 @@ export default class PlaylistList extends React.Component {
 				albums.push(this.parseAlbum(album));
 			}
 		return (
-			<CustomScroll heightRelativeToParent="100%">
+			// <CustomScroll heightRelativeToParent="100%">
 				<aside className="main-section__playlists-list">
-					{albums}
+					<InfiniteScroll
+		        pageStart={0}
+		        loadMore={()=>this.getUserAlbums(true)}
+		        hasMore={hasMore(this.props.state.library.albumList)}
+		        loader={<div className="loader">Loading ...</div>}
+		        useWindow={false}
+		    		>
+						{albums}
+			    </InfiniteScroll>
 				</aside>
-			</CustomScroll>
+			// </CustomScroll>
 		)
 	}
 

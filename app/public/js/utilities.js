@@ -26,3 +26,10 @@ export function refreshToken(callback) {
 		callback();
 	})
 }
+
+export function hasMore(list) {
+	if (list) {
+		return list.next?true:false;
+	}
+	return false;
+}

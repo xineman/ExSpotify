@@ -148,6 +148,7 @@ app.get('/refresh_token', function(req, res) {
 	});
 });
 
+console.log("Listening at port 3000");
 app.listen(3000);
 
 var token = "";

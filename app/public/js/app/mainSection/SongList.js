@@ -1,4 +1,5 @@
-import {getCookie, refreshToken} from '../../utilities.js';
+import {getCookie, refreshToken, hasMore} from '../../utilities.js';
+import InfiniteScroll from 'react-infinite-scroller';
 import CustomScroll from 'react-custom-scroll';
 export default class SongList extends React.Component {
 	constructor() {
@@ -52,46 +53,46 @@ export default class SongList extends React.Component {
 		return true;
 	}
 
-	getPlaylist(playlist) {
+	getPlaylist(playlist, isAppend) {
 		$.ajax({
-			url: `https://api.spotify.com/v1/users/${playlist.owner.id}/playlists/${playlist.id}`,
+			url: isAppend?this.props.state.library.playlistSonglist.next:`https://api.spotify.com/v1/users/${playlist.owner.id}/playlists/${playlist.id}/tracks`,
 			headers: {
 				'Authorization': 'Bearer ' + getCookie("access_token")
 			}
 		}).done((songs) => {
 			console.log(songs);
-			this.props.setPlaylistSonglist(songs);
+			this.props.setPlaylistSonglist(songs, isAppend);
 		}).fail((xhr, status, errorThrown) => {
-			refreshToken(() => this.getPlaylist(playlist));
+			refreshToken(() => this.getPlaylist(playlist, isAppend));
 			console.log("Error: " + errorThrown);
 			console.log("Status: " + status);
 			console.dir(xhr);
 		});
 	}
 
-	getAlbum(albumId) {
-		$.ajax({url: `https://api.spotify.com/v1/albums/${albumId}`}).done((songs) => {
+	getAlbum(albumId, isAppend) {
+		$.ajax({url: isAppend?this.props.state.library.albumSonglist.next:`https://api.spotify.com/v1/albums/${albumId}/tracks`}).done((songs) => {
 			console.log(songs);
-			this.props.setAlbumSonglist(songs);
+			this.props.setAlbumSonglist(songs, isAppend);
 		}).fail((xhr, status, errorThrown) => {
-			refreshToken(() => this.getAlbum(albumId));
+			refreshToken(() => this.getAlbum(albumId, isAppend));
 			console.log("Error: " + errorThrown);
 			console.log("Status: " + status);
 			console.dir(xhr);
 		});
 	}
 
-	getSavedSongs() {
+	getSavedSongs(isAppend) {
 		$.ajax({
-			url: `https://api.spotify.com/v1/me/tracks`,
+			url: isAppend?this.props.state.library.songlist.next:`https://api.spotify.com/v1/me/tracks`,
 			headers: {
 				'Authorization': 'Bearer ' + getCookie("access_token")
 			}
 		}).done((songs) => {
 			console.log(songs);
-			this.props.setSavedSonglist(songs);
+			this.props.setSavedSonglist(songs, isAppend);
 		}).fail((xhr, status, errorThrown) => {
-			refreshToken(() => this.getSavedSongs());
+			refreshToken(() => this.getSavedSongs(isAppend));
 			console.log("Error: " + errorThrown);
 			console.log("Status: " + status);
 			console.dir(xhr);
@@ -123,11 +124,37 @@ export default class SongList extends React.Component {
 			</tr>
 		);
 	}
+	loadMore() {
+		switch (this.props.state.library.state) {
+			case "playlist":
+				this.getPlaylist(this.props.state.library.playlistList.items[this.props.state.library.selectedPlaylist], true);
+				break;
+			case "album":
+				this.getAlbum(this.props.state.library.albumList.items[this.props.state.library.selectedAlbum].album.id, true);
+				break;
+			case "songs":
+				this.getSavedSongs(true);
+				break;
+		}
+	}
+	hasMore() {
+		switch (this.props.state.library.state) {
+			case "playlist":
+				return hasMore(this.props.state.library.playlistSonglist);
+				break;
+			case "album":
+				return hasMore(this.props.state.library.albumSonglist);
+				break;
+			case "songs":
+				return hasMore(this.props.state.library.songlist);
+				break;
+		}
+	}
 	renderPlaylist(playlist) {
 		var songs = [];
 		var list = this.props.state.library.state == "songs"
 			? playlist.items
-			: playlist.tracks.items;
+			: playlist.items;
 		for (let song of list) {
 			if (this.props.state.library.state == "album")
 				songs.push(this.parseSong(song));
@@ -135,7 +162,7 @@ export default class SongList extends React.Component {
 				songs.push(this.parseSong(song.track));
 			}
 		return (
-			<CustomScroll heightRelativeToParent="100%">
+			// <CustomScroll heightRelativeToParent="100%">
 				<section className="main-section__songs">
 
 					<table className="main-section__songs-list">
@@ -148,12 +175,19 @@ export default class SongList extends React.Component {
 								<th className="main-section__duration-col">Duration</th>
 							</tr>
 						</thead>
-						<tbody>
-							{songs}
-						</tbody>
+							<InfiniteScroll
+								element = {"tbody"}
+				        pageStart={0}
+				        loadMore={() => this.loadMore()}
+				        hasMore={this.hasMore()}
+				        loader={<div className="loader">Loading ...</div>}
+				        useWindow={false}
+				    		>
+								{songs}
+					    </InfiniteScroll>
 					</table>
 				</section>
-			</CustomScroll>
+			// </CustomScroll>
 		)
 	}
 
