@@ -115,13 +115,13 @@ export default class SongList extends React.Component {
 	}
 	parseSong(song) {
 		return (
-			<tr key={song.id} id={song.id} className="main-section__song-row" onClick={(e) => this.songClickListener(e, song.id)}>
-				<td><input id="input" className="main-section__song-checkbox" type="checkbox"/></td>
-				<td>{song.name}</td>
-				<td>{this.parseArtists(song)}</td>
-				{this.props.state.library.state != "album" && <td>{song.album.name}</td>}
-				<td>{this.convertDuration(song.duration_ms)}</td>
-			</tr>
+			<li key={song.id} id={song.id} className="main-section__songs-row" onClick={(e) => this.songClickListener(e, song.id)}>
+				<div className="main-section__songs-col main-section__check-col"><input id="input" className="main-section__song-checkbox" type="checkbox"/></div>
+				<div className={"main-section__songs-col "+ (this.props.state.library.state != "album"? "main-section__song-col":"main-section__song-wide-col")}>{song.name}</div>
+				<div className="main-section__songs-col main-section__artist-col">{this.parseArtists(song)}</div>
+				{this.props.state.library.state != "album" && <div  className="main-section__songs-col main-section__album-col">{song.album.name}</div>}
+				<div className="main-section__songs-col main-section__duration-col">{this.convertDuration(song.duration_ms)}</div>
+			</li>
 		);
 	}
 	loadMore() {
@@ -164,28 +164,24 @@ export default class SongList extends React.Component {
 		return (
 			// <CustomScroll heightRelativeToParent="100%">
 				<section className="main-section__songs">
-
-					<table className="main-section__songs-list">
-						<thead>
-							<tr>
-								<th className="main-section__check-col">Check</th>
-								<th className="main-section__song-col">Song</th>
-								<th className="main-section__artist-col">Artist</th>
-								{this.props.state.library.state != "album" && <th className="main-section__album-col">Album</th>}
-								<th className="main-section__duration-col">Duration</th>
-							</tr>
-						</thead>
-							<InfiniteScroll
-								element = {"tbody"}
-				        pageStart={0}
-				        loadMore={() => this.loadMore()}
-				        hasMore={this.hasMore()}
-				        loader={<div className="loader">Loading ...</div>}
-				        useWindow={false}
-				    		>
-								{songs}
-					    </InfiniteScroll>
-					</table>
+					<div className="main-section__songs-header main-section__songs-row">
+						<div className="main-section__songs-col main-section__check-col">C</div>
+						<div className={"main-section__songs-col "+ (this.props.state.library.state != "album"? "main-section__song-col":"main-section__song-wide-col")}>Song</div>
+						<div className="main-section__songs-col main-section__artist-col">Artist</div>
+						{this.props.state.library.state != "album" && <div className="main-section__songs-col main-section__album-col">Album</div>}
+						<div className="main-section__songs-col main-section__duration-col">Duration</div>
+					</div>
+					<ul className="main-section__songs-list">
+						<InfiniteScroll
+							pageStart={0}
+							loadMore={() => this.loadMore()}
+							hasMore={this.hasMore()}
+							loader={<div className="loader main-section__songs-row">Loading ...</div>}
+							useWindow={false}
+							>
+							{songs}
+						</InfiniteScroll>
+					</ul>
 				</section>
 			// </CustomScroll>
 		)

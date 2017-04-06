@@ -32,7 +32,7 @@ a {
 }
 
 .container {
-    max-width: 1024px;
+    width: 1024px;
     margin: auto;
 }
 
@@ -353,7 +353,7 @@ a {
     flex: 1 1 auto;
     position: relative;
     display: flex;
-    justify-content: center;
+    // justify-content: center;
     height: 100%;
 }
 
@@ -363,6 +363,7 @@ a {
     // top: 0;
     // left: -280px;
     // transition: 0.5s;
+    flex: none;
     height: 100%;
     overflow-y: auto;
 }
@@ -373,16 +374,86 @@ a {
 
 .main-section__songs {
     height: 100%;
-    overflow-y: auto;
-    // overflow-x: hidden;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     padding: 5px;
-    width: 1024px-10px-280px;
     box-sizing: border-box;
     transition: 0.5s;
 }
 
 .main-section__songs_only {
     width: 1024px-10px;
+}
+
+.main-section__songs-header {
+    color: $secondary-text-color;
+    // overflow-y: scroll;
+}
+
+.main-section__songs-row {
+    display: flex;
+    // justify-content: space-between;
+    width: 100%;
+    font: 300 12pt $font-stack;
+
+    &:not(.main-section__songs-header):hover {
+        background-color: $grey-light;
+        cursor: pointer;
+    }
+
+    &:not(.main-section__songs-header) {
+        color: $header-text-color;
+    }
+}
+
+.main-section__songs-col {
+    display: inline-block;
+    flex: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:not(:last-child) {
+        padding-right: 5px;
+    }
+}
+
+.main-section__songs-list {
+    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.main-section__check-col {
+    // flex: 0 0 20px;
+    float: left;
+    width: 20px;
+}
+
+.main-section__song-col {
+    flex: 0 1 40%;
+}
+
+.main-section__song-wide-col {
+    flex: 0 1 70%;
+}
+
+.main-section__artist-col {
+    flex: 0 0 30%;
+}
+
+.main-section__album-col {
+    flex: 0 0 30%;
+}
+
+.main-section__duration-col {
+    // flex: 0 0 40px;
+    float: right;
+    width: 40px;
 }
 
 .main-section__playlist-summary {
@@ -409,8 +480,7 @@ a {
 .main-section__playlist-summary_active {
     background-color: $grey-dark;
     // width: 266px;
-    padding: 5px;
-    padding-left: 9px;
+    padding: 5px 5px 5px 9px;
 }
 
 .main-section__playlist-cover {
@@ -437,7 +507,6 @@ a {
 .main-section__playlists-checkbox {
     display: none;
 }
-
 // input[type=checkbox].css-checkbox {
 //     position: absolute;
 //     z-index: -1000;
@@ -473,58 +542,13 @@ label.css-label {
     user-select: none;
 }
 
-.main-section__songs-list {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    white-space: nowrap;
-
-    td {
-        color: $header-text-color;
-        font: 300 12pt $font-stack;
-        text-align: left;
-        padding: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    th {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: $secondary-text-color;
-        font: 300 12pt $font-stack;
-        text-align: left;
-        padding: 5px;
-    }
-
-    tbody tr:hover {
-        background-color: $grey-light;
-        cursor: pointer;
-    }
-}
-.main-section__check-col {
-  width: 20px;
-}
-// .main-section__check-col {
-//   width: 40px;
-// }
-// .main-section__check-col {
-//   width: 40px;
-// }
-// .main-section__check-col {
-//   width: 40px;
-// }
-.main-section__duration-col {
-  width: 30px;
-}
 .main-section__status-message {
-    min-width: 1024px-280px-10px;
-    // width: 100%;
+    // min-width: 1024px-280px-10px;
+    width: 100%;
     @extend .header__nav-item;
     text-align: center;
 }
+
 .main-section__playlists-status {
     width: 280px;
     // width: 100%;
@@ -533,5 +557,5 @@ label.css-label {
 }
 
 .main-section .inner-handle {
-  background-color: $secondary-text-color;
+    background-color: $secondary-text-color;
 }
