@@ -21,7 +21,7 @@ export default class Nickname extends React.Component {
 					: data.id,
 				imgUrl: data.images[0].url
 			});
-			this.props.setUserId(data.id);
+			// this.props.setUserId(data.id);
 		}).fail((xhr, status, errorThrown) => {
 			refreshToken(() => this.getUserData());
 			console.log("Error: " + errorThrown);

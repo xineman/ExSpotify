@@ -6,10 +6,30 @@ export default class PlaylistList extends React.Component {
 		super();
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		if (nextProps.state.source == this.props.state.source && nextProps.state.library.state == this.props.state.library.state) {
+			switch (this.props.state.library.state) {
+				case "playlist":
+					if (JSON.stringify(nextProps.state.library.playlistList)==JSON.stringify(this.props.state.library.playlistList))
+						return false;
+					break;
+				case "album":
+					if (JSON.stringify(nextProps.state.library.albumList)==JSON.stringify(this.props.state.library.albumList))
+						return false;
+					break;
+			}
+		}
+		return true;
+	}
 	componentDidMount() {
+		this.setListeners();
 	}
 
 	componentDidUpdate() {
+		this.setListeners();
+	}
+
+	setListeners() {
 		$('.main-section__playlist-summary').click(function(event) {
 			$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
 			$(this).addClass('main-section__playlist-summary_active');
@@ -26,7 +46,6 @@ export default class PlaylistList extends React.Component {
 				}
 			);
 	}
-
 	getUserPlaylists(isAppend) {
 		$.ajax({
 			url: isAppend?this.props.state.library.playlistList.next:`https://api.spotify.com/v1/me/playlists`,
@@ -35,8 +54,6 @@ export default class PlaylistList extends React.Component {
 			}
 		}).done((list) => {
 			this.props.setPlaylistList(list, isAppend);
-			console.log("Loaded playlists");
-			console.log(this.props.state);
 		}).fail((xhr, status, errorThrown) => {
 			refreshToken(() => this.getUserPlaylists(isAppend));
 			console.log("Error: " + errorThrown);
@@ -53,8 +70,6 @@ export default class PlaylistList extends React.Component {
 			}
 		}).done((list) => {
 			this.props.setAlbumList(list, isAppend);
-			console.log("Loaded albums");
-			console.log(this.props.state);
 		}).fail((xhr, status, errorThrown) => {
 			refreshToken(() => this.getUserAlbums(isAppend));
 			console.log("Error: " + errorThrown);
@@ -85,7 +100,7 @@ export default class PlaylistList extends React.Component {
 	renderList(playlistList) {
 		var playlists = [];
 		for (let playlist of playlistList.items) {
-			if (playlistList.items.indexOf(playlist) == 0) {
+			if (playlistList.items.indexOf(playlist) == this.props.state.library.selectedPlaylist) {
 				playlists.push(this.parsePlaylist(playlist, true));
 			} else
 				playlists.push(this.parsePlaylist(playlist));
@@ -130,7 +145,7 @@ export default class PlaylistList extends React.Component {
 	renderAlbumList(albumList) {
 		var albums = [];
 		for (let album of albumList.items) {
-			if (albumList.items.indexOf(album) == 0) {
+			if (albumList.items.indexOf(album) == this.props.state.library.selectedAlbum) {
 				albums.push(this.parseAlbum(album, true));
 			} else
 				albums.push(this.parseAlbum(album));
@@ -153,6 +168,8 @@ export default class PlaylistList extends React.Component {
 	}
 
 	render() {
+		console.log("PlaylistList render");
+		// console.log(this.props.state.library);
 		switch (this.props.state.library.state) {
 			case "playlist":
 				if (this.props.state.library.playlistList == null) {

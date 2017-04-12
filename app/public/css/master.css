@@ -217,7 +217,7 @@ a {
 .content-header__source-wrapper {
   margin-right: auto; }
 
-.content-header__go-btn {
+.content-header__dest-wrapper {
   margin-left: auto; }
 
 .content-header__dropdown-content {
@@ -391,7 +391,8 @@ a {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  font: 300 12pt Roboto, sans-serif; }
+  font: 300 12pt Roboto, sans-serif;
+  padding: 5px 0; }
   .main-section__songs-row:not(.main-section__songs-header):hover {
     background-color: #292929;
     cursor: pointer; }
@@ -498,11 +499,19 @@ a {
 
 .main-section__playlist-name {
   color: #FFF;
-  font: 300 14pt Roboto, sans-serif; }
+  font: 300 14pt Roboto, sans-serif;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 135px; }
 
 .main-section__playlist-author {
   color: #C2C2C2;
-  font: 300 12pt Roboto, sans-serif; }
+  font: 300 12pt Roboto, sans-serif;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 135px; }
 
 .main-section__playlists-checkbox {
   display: none; }

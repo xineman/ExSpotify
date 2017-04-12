@@ -21,30 +21,29 @@ $(document).ready(function() {
 	});
 });
 
-
-
 class App extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			signedIn: this.isSignedIn(),
-			userId: null
+			// signedIn: this.isSignedIn(),
+			// spotifyLogin: null,
+			// vkLogin: null
 		}
 	}
-	isSignedIn() {
-		// return true;
-		return getCookie("signedIn") == "true"
-			? true
-			: false;
-	}
+	// isSignedIn() {
+	// 	// return true;
+	// 	return getCookie("signedIn") == "true"
+	// 		? true
+	// 		: false;
+	// }
 	setUserId(id) {
-		this.setState({userId: id});
+		// this.setState({spotifyLogin: id});
 	}
 	render() {
 		return (
 			<div id="react-container">
-				<Header setUserId={(id) => this.setUserId(id)} userId={this.state.userId} signedIn={this.state.signedIn}/>
-				<MainSection userId={this.state.userId} signedIn={this.state.signedIn}/>
+				<Header setUserId={(id) => this.setUserId(id)} state={this.state}/>
+				<MainSection state={this.state}/>
 			</div>
 		);
 	}

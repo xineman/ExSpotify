@@ -11,7 +11,7 @@ export default class MainSection extends React.Component {
         this.state = {
             source: "library",
             library: {
-                state: "playlist",
+                state: "playlist", //playlist, album, songs
                 songlist: null,
                 playlistList: null,
                 albumList: null,
@@ -32,7 +32,7 @@ export default class MainSection extends React.Component {
     }
 
     componentWillMount() {
-        if (this.props.signedIn) {
+        if (getCookie("access_token")) {
             this.changeSource(null, "choose-library");
         } else {
             this.changeSource(null, "choose-url");
@@ -64,6 +64,21 @@ export default class MainSection extends React.Component {
         }
 
     }
+    //TODO calculate window location
+    changeDest(event) {
+      if (!getCookie("vk_access_token")) {
+        var popup = window.open("/auth/vk", "","width=655,height=350,status=no,left=300,top=150");
+        var checking = setInterval(() => {
+          if (getCookie("vk_access_token")) {
+            alert("yes");
+          }
+          if (popup.closed) {
+            console.log("just closed");
+            clearInterval(checking);
+          }
+        }, 1000);
+      }
+    }
 
     changeUrl() {
         this.setState({
@@ -89,7 +104,12 @@ export default class MainSection extends React.Component {
                 })});
         }
 
-    setAlbumList(list) {
+    setAlbumList(list, isAppend) {
+			if (isAppend)
+					this.setState({library: Object.assign({}, this.state.library, {
+									albumList: Object.assign({}, this.state.library.albumList, {items: [...this.state.library.albumList.items, ...list.items], next: list.next})
+							})});
+			else
         this.setState({library: Object.assign({}, this.state.library, {
                 albumList: list,
                 selectedAlbum: 0
@@ -127,17 +147,21 @@ export default class MainSection extends React.Component {
     }
 
     selectPlaylist(index) {
+      if (index!=this.state.library.selectedPlaylist) {
         this.setState({library: Object.assign({}, this.state.library, {
-                playlistSonglist: null,
-                selectedPlaylist: index
-            })});
+          playlistSonglist: null,
+          selectedPlaylist: index
+        })});
+      }
     }
 
     selectAlbum(index) {
+      if (index!=this.state.library.selectedAlbum) {
         this.setState({library: Object.assign({}, this.state.library, {
                 albumSonglist: null,
                 selectedAlbum: index
             })});
+      }
     }
 
     parseUrl(event) {
@@ -162,7 +186,7 @@ export default class MainSection extends React.Component {
                 playlistUrl: playlistUrl
             }
         }).done((playlist) => {
-            console.log(playlist.name);
+            console.log(playlist);
             this.setState({
                 url: {
                     state: "playlist",
@@ -184,14 +208,14 @@ export default class MainSection extends React.Component {
     }
 
     showPlaylists() {
-        if (this.props.signedIn)
+        if (getCookie("access_token"))
             switch (this.state.source) {
                 case "library":
                     switch (this.state.library.state) {
                         case "playlist":
-                            return (<PlaylistList userId={this.props.userId} state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
+                            return (<PlaylistList state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
                         case "album":
-                            return (<PlaylistList state={this.state} setAlbumList={(list) => this.setAlbumList(list)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
+                            return (<PlaylistList state={this.state} setAlbumList={(list, isAppend) => this.setAlbumList(list, isAppend)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
                     }
                 default:
             }
@@ -199,7 +223,7 @@ export default class MainSection extends React.Component {
     }
 
     showSongList() {
-        if (!this.props.signedIn && this.state.source != "url")
+        if (!getCookie("access_token") && this.state.source != "url")
             return (
                 <h3 className="main-section__status-message">
                     You have to sign in
@@ -222,19 +246,20 @@ export default class MainSection extends React.Component {
             case "library":
                 switch (this.state.library.state) {
                     case "playlist":
-                        return (<SongList userId={this.props.userId} setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
+                        return (<SongList setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
                     case "album":
-                        return (<SongList userId={this.props.userId} setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
+                        return (<SongList setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
                     case "songs":
-                        return (<SongList userId={this.props.userId} setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
+                        return (<SongList setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
                 }
         }
     }
 
     render() {
+      console.log("Main section render");
         return (
             <main className="main">
-                <MainHeader state={this.state} openUrlClick={(event) => this.parseUrl(event)} changeSource={(source) => this.changeSource(source)} changeUrl={() => this.changeUrl()} cancelRequest={() => this.ajaxRequest.abort()} selectLibrarySource={(s) => this.selectLibrarySource(s)}/>
+                <MainHeader state={this.state} openUrlClick={(event) => this.parseUrl(event)} changeSource={(source) => this.changeSource(source)} changeDest={(source) => this.changeDest(source)} changeUrl={() => this.changeUrl()} cancelRequest={() => this.ajaxRequest.abort()} selectLibrarySource={(s) => this.selectLibrarySource(s)} />
                 <section className="main-section container">
                     {this.showPlaylists()}
                     {this.showSongList()}

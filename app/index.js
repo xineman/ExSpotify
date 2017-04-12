@@ -3,24 +3,16 @@ const path = require('path');
 const request = require('request');
 const querystring = require('query-string'); //Edited
 const cookieParser = require('cookie-parser');
+const utilities = require('./utilities.js');
 var app = express();
 
 var requestOptions;
-var client_id = "779a5324d5774343973fd9601952154c";
-var client_secret = "d7497c8b635f490e8ad8d5e1df451e69";
+var client_id = "";
+var client_secret = "";
 // var redirect_uri = "http://185.5.52.181:3000/callback";
 var redirect_uri = "http://localhost:3000/callback";
 var stateKey = 'spotify_auth_state';
 
-var generateRandomString = function(length) {
-	var text = '';
-	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-	for (var i = 0; i < length; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-};
 
 //DEV
 var webpackDevMiddleware = require("webpack-dev-middleware");
@@ -37,6 +29,8 @@ app.use(webpackDevMiddleware(compiler, {
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
+
+app.use('/auth', require('./routes/auth.js'));
 
 app.get('/', function(req, res) {
 	res.sendFile('index.html', {
@@ -57,7 +51,7 @@ app.get('/get-playlist', function(req, res) {
 
 app.get('/login', function(req, res) {
 	var scope = 'user-read-private user-library-read';
-	var state = generateRandomString(16);
+	var state = utilities.generateRandomString(16);
 	res.cookie(stateKey, state);
 	res.redirect('https://accounts.spotify.com/authorize?' + querystring.stringify({response_type: 'code', client_id: client_id, scope: scope, redirect_uri: redirect_uri, state: state}));
 });
@@ -67,9 +61,6 @@ app.get('/logout', function(req, res) {
 		expires: new Date(1000)
 	});
 	res.cookie("refresh_token", "", {
-		expires: new Date(1000)
-	});
-	res.cookie("signedIn", false, {
 		expires: new Date(1000)
 	});
 	res.redirect('/');
@@ -112,9 +103,6 @@ app.get('/callback', function(req, res) {
 				res.cookie("refresh_token", body.refresh_token, {
 					expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
 				});
-				res.cookie("signedIn", true, {
-					expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
-				});
 				res.redirect('/');
 			}
 		});
@@ -147,7 +135,6 @@ app.get('/refresh_token', function(req, res) {
 		}
 	});
 });
-
 console.log("Listening at port 3000");
 app.listen(3000);
 

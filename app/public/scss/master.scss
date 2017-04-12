@@ -230,7 +230,7 @@ a {
     margin-right: auto;
 }
 
-.content-header__go-btn {
+.content-header__dest-wrapper {
     margin-left: auto;
 }
 
@@ -397,6 +397,7 @@ a {
     // justify-content: space-between;
     width: 100%;
     font: 300 12pt $font-stack;
+    padding: 5px 0;
 
     &:not(.main-section__songs-header):hover {
         background-color: $grey-light;
@@ -497,11 +498,19 @@ a {
 .main-section__playlist-name {
     color: $header-text-color;
     font: 300 14pt $font-stack;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 135px;
 }
 
 .main-section__playlist-author {
     color: $secondary-text-color;
     font: 300 12pt $font-stack;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 135px;
 }
 
 .main-section__playlists-checkbox {

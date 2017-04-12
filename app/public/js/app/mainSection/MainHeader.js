@@ -46,6 +46,18 @@ export default class MainHeader extends React.Component {
 				return "Playlist URL"
 		}
 	}
+	// getDestName() {
+	// 	switch (this.props.state.dest) {
+	// 		case "vk":
+	// 			return "VK";
+	// 			break;
+	// 		case "popular":
+	// 			return "Popular";
+	// 			break;
+	// 		case "url":
+	// 			return "Playlist URL"
+	// 	}
+	// }
 	render() {
 		return (
 			<section className="content-header">
@@ -54,7 +66,7 @@ export default class MainHeader extends React.Component {
 						<div className="content-header__source-wrapper">
 							<div className="content-header__source-dropdown dropdown">
 								<div className="content-header__dropdown-title dropdown-title">
-									<p id="current-source" className="content-header__nav-item">Source: {this.getSourceName()}</p>
+									<p id="current-source" className="content-header__nav-item">From: {this.getSourceName()}</p>
 									<div className="header__dropdown-arrow dropdown-arrow"></div>
 								</div>
 								<div className="content-header__dropdown-content dropdown-content">
@@ -71,7 +83,21 @@ export default class MainHeader extends React.Component {
 						{this.selectSourceOption()}
 					</div>
 					<div className="flex-item">
-						<a className="content-header__nav-item content-header__go-btn" href="#">Go!</a>
+						<div className="content-header__dest-wrapper">
+							<div className="content-header__source-dropdown dropdown">
+								<div className="content-header__dropdown-title dropdown-title">
+									<p id="current-source" className="content-header__nav-item">Convert to</p>
+									<div className="header__dropdown-arrow dropdown-arrow"></div>
+								</div>
+								<div className="content-header__dropdown-content dropdown-content">
+									<ul className="content-header__dropdown-options">
+										<li id="choose-library" className="content-header__dropdown-item" onClick={(event) => this.props.changeDest(event)}>VK</li>
+										<li id="choose-popular" className="content-header__dropdown-item" >Youtube</li>
+										<li id="choose-url" className="content-header__dropdown-item" >Google Play Music</li>
+									</ul>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>

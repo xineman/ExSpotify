@@ -1,5 +1,6 @@
 import Nickname from './header/Nickname.js';
 import LoginBtn from './header/LoginBtn.js';
+import { getCookie, refreshToken } from '../utilities.js';
 
 export default class Header extends React.Component {
 	constructor() {
@@ -37,7 +38,7 @@ export default class Header extends React.Component {
 							</div>
 						</li>
 					</ul>
-					{this.props.signedIn
+					{getCookie("access_token")
 						? <Nickname setUserId={(id) => this.props.setUserId(id)}/>
 						: <LoginBtn/>}
 				</div>
