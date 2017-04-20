@@ -12,18 +12,19 @@ var client_secret = "";
 // var redirect_uri = "http://185.5.52.181:3000/callback";
 var redirect_uri = "http://localhost:3000/callback";
 var stateKey = 'spotify_auth_state';
+var client_redirect;
 
 
 //DEV
-var webpackDevMiddleware = require("webpack-dev-middleware");
-var webpack = require("webpack");
-var webpackConfig = require("./webpack.config");
-var compiler = webpack(webpackConfig);
-app.use(webpackDevMiddleware(compiler, {
-	contentBase: path.resolve(__dirname, "./public/"),
-	watchContentBase: true,
-	publicPath: "/js/" // Same as `output.publicPath` in most cases.
-}));
+// var webpackDevMiddleware = require("webpack-dev-middleware");
+// var webpack = require("webpack");
+// var webpackConfig = require("../webpack.config");
+// var compiler = webpack(webpackConfig);
+// app.use(webpackDevMiddleware(compiler, {
+// 	contentBase: path.resolve(__dirname, "./public/"),
+// 	watchContentBase: true,
+// 	publicPath: "/js/" // Same as `output.publicPath` in most cases.
+// }));
 //END DEV
 
 
@@ -32,11 +33,11 @@ app.use(cookieParser());
 
 app.use('/auth', require('./routes/auth.js'));
 
-app.get('/', function(req, res) {
-	res.sendFile('index.html', {
-		root: path.join(__dirname, 'public')
-	});
-});
+// app.get('/', function(req, res) {
+// 	res.sendFile('index.html', {
+// 		root: path.join(__dirname, 'public')
+// 	});
+// });
 
 app.get('/get-playlist', function(req, res) {
 	requestOptions = {
@@ -50,6 +51,8 @@ app.get('/get-playlist', function(req, res) {
 });
 
 app.get('/login', function(req, res) {
+	console.log(req.query);
+	client_redirect = req.query.url;
 	var scope = 'user-read-private user-library-read';
 	var state = utilities.generateRandomString(16);
 	res.cookie(stateKey, state);
@@ -63,14 +66,13 @@ app.get('/logout', function(req, res) {
 	res.cookie("refresh_token", "", {
 		expires: new Date(1000)
 	});
-	res.redirect('/');
+	res.redirect(req.query.url);
 });
 
 app.get('/callback', function(req, res) {
 
 	// your application requests refresh and access tokens
 	// after checking the state parameter
-
 	var code = req.query.code || null;
 	var state = req.query.state || null;
 	var storedState = req.cookies
@@ -103,7 +105,7 @@ app.get('/callback', function(req, res) {
 				res.cookie("refresh_token", body.refresh_token, {
 					expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
 				});
-				res.redirect('/');
+				res.redirect(client_redirect);
 			}
 		});
 	}

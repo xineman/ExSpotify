@@ -63,20 +63,18 @@ a {
 
 .header__navigation_right {}
 
-.header__title {
-    font: 20pt $font-stack;
-    color: $header-text-color;
-    display: inline-block;
-}
-
 .header__nav-item {
     color: $header-text-color;
-    font: 16pt $font-stack;
+    font: 600 12pt $font-stack;
     height: 50px;
     line-height: 50px;
 }
 
-.dropdown {
+.header__title {
+  font: 400 16pt $font-stack;
+}
+
+.dropdown, .dropdown_no-arrow {
     display: inline-flex;
     position: relative;
     cursor: pointer;
@@ -95,9 +93,20 @@ a {
 
 .header__nickname-dropdown {}
 
-.header__dropdown-title {
+.header__dropdown-title, .content-header__dropdown-title {
     display: flex;
     align-items: center;
+    position: relative;
+}
+
+.header__login-status {
+  position: absolute;
+  right: -5px;
+  bottom: 10px;
+  color: #7FAE85;
+  background: black;
+  border-radius: 50px;
+  border: 1px;
 }
 
 .header__profile-picture-wrapper {
@@ -118,7 +127,7 @@ a {
 .header__dropdown-arrow {
     position: absolute;
     top: 15px;
-    right: 0;
+    right: -20px;
     width: 20px;
     height: 20px;
     background-color: transparent;
@@ -178,7 +187,7 @@ a {
 
 .header__dropdown-item {
     color: $header-text-color;
-    font: 300 14pt $font-stack;
+    font: 300 12pt $font-stack;
 }
 
 .header__login-btn_hidden {
@@ -220,7 +229,7 @@ a {
 
 .content-header__nav-item {
     color: $header-text-color;
-    font: 300 18pt $font-stack;
+    font: 300 16pt $font-stack;
     height: 50px;
     line-height: 50px;
     display: inline-block;
@@ -241,7 +250,7 @@ a {
 
 .content-header__dropdown-item {
     color: $header-text-color;
-    font: 200 18pt $font-stack;
+    font: 200 12pt $font-stack;
 }
 
 .content-header__library-source {

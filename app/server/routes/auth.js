@@ -34,4 +34,10 @@ router.get("/vk/callback", function(req, res) {
         });
     }
 });
+router.get("/vk/logout", function(req, res) {
+  res.cookie("vk_access_token", "", {
+    expires: new Date(1000)
+  });
+  res.redirect(req.query.url);
+});
 module.exports = router;

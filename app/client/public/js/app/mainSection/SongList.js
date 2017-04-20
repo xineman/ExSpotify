@@ -1,4 +1,4 @@
-import {getCookie, refreshToken, hasMore} from '../../utilities.js';
+import {refreshToken, hasMore} from '../../utilities.js';
 import InfiniteScroll from 'react-infinite-scroller';
 import CustomScroll from 'react-custom-scroll';
 export default class SongList extends React.Component {
@@ -76,7 +76,7 @@ export default class SongList extends React.Component {
                 ? this.props.state.library.playlistSonglist.next
                 : `https://api.spotify.com/v1/users/${playlist.owner.id}/playlists/${playlist.id}/tracks`,
             headers: {
-                'Authorization': 'Bearer ' + getCookie("access_token")
+                'Authorization': 'Bearer ' + this.props.token
             }
         }).done((songs) => {
             this.props.setPlaylistSonglist(songs, isAppend);
@@ -109,7 +109,7 @@ export default class SongList extends React.Component {
                 ? this.props.state.library.songlist.next
                 : `https://api.spotify.com/v1/me/tracks`,
             headers: {
-                'Authorization': 'Bearer ' + getCookie("access_token")
+                'Authorization': 'Bearer ' + this.props.token
             }
         }).done((songs) => {
             console.log(songs);

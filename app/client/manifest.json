@@ -1,0 +1,22 @@
+{
+    "manifest_version": 2,
+
+    "name": "ExSpotify",
+    "description": "Transfer your playlists anywhere",
+    "version": "1.0",
+
+    "browser_action": {
+        "default_icon": "icon.png"
+
+    },
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "permissions": [
+        "activeTab",
+        "https://ajax.googleapis.com/",
+        "tabs",
+        "cookies",
+        "http://*/*"
+    ]
+}

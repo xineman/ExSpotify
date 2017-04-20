@@ -3,11 +3,11 @@ const path = require('path');
 
 const config = {
 	entry: {
-		main: path.resolve(__dirname, './public/js/app.js'),
+		main: path.resolve(__dirname, './client/public/js/app.js'),
 		libs: ['jquery', 'react', 'react-dom']
 	},
 	output: {
-		path: path.resolve(__dirname, './public/js'),
+		path: path.resolve(__dirname, './client/public/js'),
 		publicPath: "/js/",
 		filename: '[name].js'
 	},

@@ -1,4 +1,4 @@
-import { getCookie, refreshToken } from '../../utilities.js';
+import { getCookie, refreshToken, PROJECT_URL, getExtensionUrl } from '../../utilities.js';
 
 export default class Nickname extends React.Component {
 	constructor() {
@@ -11,7 +11,7 @@ export default class Nickname extends React.Component {
 		$.ajax({
 			url: 'https://api.spotify.com/v1/me',
 			headers: {
-				'Authorization': 'Bearer ' + getCookie("access_token")
+				'Authorization': 'Bearer ' + this.props.spotifyLogin
 			}
 		}).done((data) => {
 			this.setState({
@@ -64,7 +64,7 @@ export default class Nickname extends React.Component {
 					<div className="header__dropdown-content dropdown-content">
 						<ul className="header__dropdown-options">
 							<li className="header__dropdown-item">Settings</li>
-							<li className="header__dropdown-item" onClick={() => window.location.replace("/logout")}>Logout</li>
+							<li className="header__dropdown-item" onClick={() => window.location.replace(PROJECT_URL+"logout?url="+getExtensionUrl())}>Logout</li>
 						</ul>
 					</div>
 				</div>

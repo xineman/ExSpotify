@@ -1,4 +1,4 @@
-import {getCookie, refreshToken, hasMore} from '../../utilities.js';
+import {refreshToken, hasMore} from '../../utilities.js';
 import CustomScroll from 'react-custom-scroll';
 import InfiniteScroll from 'react-infinite-scroller';
 export default class PlaylistList extends React.Component {
@@ -50,7 +50,7 @@ export default class PlaylistList extends React.Component {
 		$.ajax({
 			url: isAppend?this.props.state.library.playlistList.next:`https://api.spotify.com/v1/me/playlists`,
 			headers: {
-				'Authorization': 'Bearer ' + getCookie("access_token")
+				'Authorization': 'Bearer ' + this.props.token
 			}
 		}).done((list) => {
 			this.props.setPlaylistList(list, isAppend);
@@ -66,7 +66,7 @@ export default class PlaylistList extends React.Component {
 		$.ajax({
 			url: isAppend?this.props.state.library.albumList.next:`https://api.spotify.com/v1/me/albums`,
 			headers: {
-				'Authorization': 'Bearer ' + getCookie("access_token")
+				'Authorization': 'Bearer ' + this.props.token
 			}
 		}).done((list) => {
 			this.props.setAlbumList(list, isAppend);

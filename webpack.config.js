@@ -3,7 +3,7 @@ const path = require('path');
 
 const config = {
 	entry: {
-		main: './app/public/js/app.js',
+		main: './app/client/public/js/app.js',
 		libs: ['jquery', 'react', 'react-dom']
 
 	},
