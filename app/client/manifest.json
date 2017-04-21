@@ -17,6 +17,7 @@
         "https://ajax.googleapis.com/",
         "tabs",
         "cookies",
-        "http://*/*"
+        "http://*/*",
+        "https://*/*"
     ]
 }

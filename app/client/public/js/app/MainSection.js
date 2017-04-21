@@ -1,4 +1,4 @@
-import {refreshToken, loginVk} from '../utilities.js';
+import {refreshToken, loginVk, VK_AUDIO_URL} from '../utilities.js';
 import MainHeader from './mainSection/MainHeader.js';
 import SongList from './mainSection/SongList.js';
 import PlaylistList from './mainSection/PlaylistList.js';
@@ -18,7 +18,16 @@ export default class MainSection extends React.Component {
         playlistSonglist: null,
         albumSonglist: null,
         selectedPlaylist: null,
-        selectedAlbum: null
+        selectedAlbum: null,
+        selectionSet: {
+          playlists: [
+            // {
+            //   index: 0,
+            //   whole: false,
+            //   items: []
+            // }
+          ]
+        }
       },
       popular: {
         state: "intro",
@@ -38,6 +47,42 @@ export default class MainSection extends React.Component {
     }, (cookie) => cookie
       ? this.changeSource(null, "choose-library")
       : this.changeSource(null, "choose-url"));
+  }
+  componentDidUpdate() {
+
+    console.log("Now");
+    console.log(this.state.library.selectionSet.playlists);
+  }
+  getSelection(index) {
+		return this.state.library.selectionSet.playlists.find(function(playlist){
+  		return playlist.index==index;
+		});
+	}
+  setSelection(data) {
+    switch (this.state.library.state) {
+      case "playlist":
+        // console.log("was");
+        // console.log(this.state.library.selectionSet.playlists);
+        if (data.whole || data.items) {
+          this.setState({library: Object.assign({}, this.state.library, {selectionSet: Object.assign({}, this.state.library.selectionSet, {
+                playlists: [
+                  ...this.state.library.selectionSet.playlists,
+                  data
+                ]
+              })})});
+        } else {
+          var toRemove = this.state.library.selectionSet.playlists.indexOf(this.getSelection(data.index));
+          var newList = this.state.library.selectionSet.playlists.slice();
+          newList.splice(toRemove, 1);
+          this.setState({library: Object.assign({}, this.state.library, {selectionSet: Object.assign({}, this.state.library.selectionSet, {
+                playlists: newList
+              })})});
+        }
+        break;
+      case "album":
+
+        break;
+    }
   }
   //Source can be provided either by event object or string
   changeSource(event, source) {
@@ -65,8 +110,105 @@ export default class MainSection extends React.Component {
   //TODO calculate window location
   changeDest(event) {
     if (!this.props.state.vkLogin) {
-      loginVk((token) => this.props.setLoginStatus({vkLogin: token}));
+      loginVk((token) => {
+        this.props.setLoginStatus({vkLogin: token});
+
+      });
     }
+    /*
+    $.ajax({
+      url: VK_AUDIO_URL,
+      // xhrFields: {
+      //   withCredentials: true
+      // },
+      method: "POST",
+      // dataType: "text",
+      data: {
+        act: "edit_album_box",
+        al: 1,
+        album_id:0,
+        oid: 70059105
+      },
+      success: (data) => {
+        console.log("Got hash");
+        console.log(data.substr(data.indexOf("hash")+7,18));
+        var hash = data.substr(data.indexOf("hash")+7,18);
+        $.ajax({
+          url: VK_AUDIO_URL,
+          // xhrFields: {
+          //   withCredentials: true
+          // },
+          method: "POST",
+          // dataType: "text",
+          data: {
+            Audios:"456239200,456239199",
+            act:"save_album",
+            al:1,
+            album_id:0,
+            gid:0,
+            hash:hash,
+            name:"Works"
+          },
+          success: () => {
+            console.log("Created playlist");
+          },
+          error: () => {
+            console.log("Error while creating");
+          }
+        });
+      },
+      error: () => {
+        console.log("Error while getting");
+      }
+    });
+*/
+
+    var query = "ain't nothing";
+    var aid;
+    var oid;
+    var hash;
+    $.ajax({
+      url: `https://vk.com/search?c%5Bq%5D=${query}&c%5Bsection%5D=audio`,
+      success: (data) => {
+        console.log("loaded page");
+        // console.log(data);
+        var el = document.createElement('html');
+        el.innerHTML = data;
+        var parsed = JSON.parse(el.getElementsByClassName('audio_row')[0].dataset.audio);
+        aid = parsed[0];
+        oid = parsed[1];
+        hash = parsed[13].substr(0, 18); //18
+        console.log(parsed);
+        console.log(hash);
+
+        $.ajax({
+          url: VK_AUDIO_URL,
+          // xhrFields: {
+          //   withCredentials: true
+          // },
+          method: "POST",
+          // dataType: "text",
+          data: {
+            act: "add",
+            aid: aid,
+            al: 1,
+            gid: 0,
+            hash: hash,
+            oid: oid
+          },
+          success: () => {
+            console.log("Added song");
+            window.open("https://vk.com/audio");
+          },
+          error: () => {
+            console.log("Error while adding");
+          }
+        });
+      },
+      error: () => {
+        console.log("Error while loading");
+      }
+    });
   }
 
   changeUrl() {
@@ -222,9 +364,9 @@ export default class MainSection extends React.Component {
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return (<PlaylistList token={this.props.state.spotifyLogin} state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
+              return (<PlaylistList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
             case "album":
-              return (<PlaylistList token={this.props.state.spotifyLogin} state={this.state} setAlbumList={(list, isAppend) => this.setAlbumList(list, isAppend)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
+              return (<PlaylistList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} state={this.state} setAlbumList={(list, isAppend) => this.setAlbumList(list, isAppend)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
           }
         default:
       }
@@ -255,11 +397,11 @@ export default class MainSection extends React.Component {
       case "library":
         switch (this.state.library.state) {
           case "playlist":
-            return (<SongList token={this.props.state.spotifyLogin} setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
           case "album":
-            return (<SongList token={this.props.state.spotifyLogin} setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
           case "songs":
-            return (<SongList token={this.props.state.spotifyLogin} setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
         }
     }
   }

@@ -30,21 +30,21 @@ export default class PlaylistList extends React.Component {
 	}
 
 	setListeners() {
-		$('.main-section__playlist-summary').click(function(event) {
-			$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
-			$(this).addClass('main-section__playlist-summary_active');
-		});
-		$('.main-section__playlists-checkbox, .main-section__playlists-checkbox-label').click(function(event) {
-			event.stopPropagation();
-		});
-		$('.main-section__playlists-checkbox').change(function(event) {
-			if ($(this).parent().hasClass('main-section__playlist-summary_active'))
-				if ($(this).prop("checked"))
-					$('.main-section__song-checkbox').prop("checked", true);
-				else
-					$('.main-section__song-checkbox').prop("checked", false);
-				}
-			);
+		// $('.main-section__playlist-summary').click(function(event) {
+		//
+		//
+		// });
+		// $('.main-section__playlists-checkbox-label').click(function(event) {
+		// 	event.stopPropagation();
+		// });
+		// $('.main-section__playlists-checkbox').change(function(event) {
+		// 	if ($(this).parent().hasClass('main-section__playlist-summary_active'))
+		// 		if ($(this).prop("checked"))
+		// 			$('.main-section__song-checkbox').prop("checked", true);
+		// 		else
+		// 			$('.main-section__song-checkbox').prop("checked", false);
+		// 		}
+		// 	);
 	}
 	getUserPlaylists(isAppend) {
 		$.ajax({
@@ -77,13 +77,36 @@ export default class PlaylistList extends React.Component {
 			console.dir(xhr);
 		});
 	}
+	playlistClick(event, index) {
+		if (!event.target.classList.contains("main-section__playlists-checkbox")&& !event.target.classList.contains("main-section__playlists-checkbox-label")) {
+			$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
+			$(event.target).closest(".main-section__playlist-summary").addClass('main-section__playlist-summary_active');
+			this.props.selectPlaylist(index);
+		}
+	}
+	setSelection(e,index) {
+		if (e.target.checked) {
+			this.props.setSelection({
+				index: index,
+				whole: true
+			});
+			// console.log("Found");
+		} else {
+			// console.log("Not Found");
+			this.props.setSelection({
+				index: index,
+				whole: false
+			});
+		}
+	}
+
 
 	parsePlaylist(playlist, isActive) {
 		const index = this.props.state.library.playlistList.items.indexOf(playlist);
 		return (
 			<div key={playlist.id} className={"main-section__playlist-summary" + (isActive
 				? " main-section__playlist-summary_active"
-				: "")} onClick={() => this.props.selectPlaylist(index)}>
+				: "")} onClick={(e) => this.playlistClick(e, index)}>
 				<img className="main-section__playlist-cover" src={playlist.images.length
 					? playlist.images[0].url
 					: "img/album art.jpg"} alt="Album cover"/>
@@ -91,7 +114,8 @@ export default class PlaylistList extends React.Component {
 					<h3 className="main-section__playlist-name">{playlist.name}</h3>
 					<h4 className="main-section__playlist-author">by {playlist.owner.id}</h4>
 				</div>
-				<input id={playlist.id} className="main-section__playlists-checkbox css-checkbox" type="checkbox"/>
+				<input id={playlist.id} className="main-section__playlists-checkbox css-checkbox" type="checkbox" onChange={(e) => this.setSelection(e,index)}/>
+				{/* value={this.getSelection(index)}  */}
 				<label className="main-section__playlists-checkbox-label css-label" htmlFor={playlist.id}></label>
 			</div>
 		);

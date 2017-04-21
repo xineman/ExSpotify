@@ -1,19 +1,39 @@
 export const PROJECT_URL = "http://localhost:3000/";
+export const VK_AUDIO_URL = "https://vk.com/al_audio.php";
 export function getExtensionUrl() {
 	return chrome.extension.getURL('public/index.html');
 }
 
-export function refreshToken(callback) {
-	console.log("Going to refresh token");
-	$.ajax({
-		url: "/refresh_token",
-		data: {
-			refresh_token: getCookie("refresh_token")
+export function getCookie(cname) {
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
 		}
-	}).done((data) => {
-		console.log("Refreshed");
-		callback();
-	})
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return null;
+}
+
+export function refreshToken(callback) {
+	chrome.cookies.get({url: "http://localhost", name:"refresh_token"}, (cookie) => {
+		console.log("Going to refresh token");
+		$.ajax({
+			url: PROJECT_URL+"refresh_token",
+			data: {
+				refresh_token: cookie.value
+			}
+		}).done((data) => {
+			console.log("Refreshed");
+			callback();
+		})
+	});
+
 }
 
 export function hasMore(list) {

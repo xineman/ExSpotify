@@ -17,24 +17,44 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.getExtensionUrl = getExtensionUrl;
+exports.getCookie = getCookie;
 exports.refreshToken = refreshToken;
 exports.hasMore = hasMore;
 exports.loginVk = loginVk;
 var PROJECT_URL = exports.PROJECT_URL = "http://localhost:3000/";
+var VK_AUDIO_URL = exports.VK_AUDIO_URL = "https://vk.com/al_audio.php";
 function getExtensionUrl() {
 	return chrome.extension.getURL('public/index.html');
 }
 
-function refreshToken(callback) {
-	console.log("Going to refresh token");
-	$.ajax({
-		url: "/refresh_token",
-		data: {
-			refresh_token: getCookie("refresh_token")
+function getCookie(cname) {
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
 		}
-	}).done(function (data) {
-		console.log("Refreshed");
-		callback();
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return null;
+}
+
+function refreshToken(callback) {
+	chrome.cookies.get({ url: "http://localhost", name: "refresh_token" }, function (cookie) {
+		console.log("Going to refresh token");
+		$.ajax({
+			url: PROJECT_URL + "refresh_token",
+			data: {
+				refresh_token: cookie.value
+			}
+		}).done(function (data) {
+			console.log("Refreshed");
+			callback();
+		});
 	});
 }
 
@@ -472,7 +492,16 @@ var MainSection = function (_React$Component) {
         playlistSonglist: null,
         albumSonglist: null,
         selectedPlaylist: null,
-        selectedAlbum: null
+        selectedAlbum: null,
+        selectionSet: {
+          playlists: [
+            // {
+            //   index: 0,
+            //   whole: false,
+            //   items: []
+            // }
+          ]
+        }
       },
       popular: {
         state: "intro",
@@ -497,6 +526,45 @@ var MainSection = function (_React$Component) {
       }, function (cookie) {
         return cookie ? _this2.changeSource(null, "choose-library") : _this2.changeSource(null, "choose-url");
       });
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+
+      console.log("Now");
+      console.log(this.state.library.selectionSet.playlists);
+    }
+  }, {
+    key: 'getSelection',
+    value: function getSelection(index) {
+      return this.state.library.selectionSet.playlists.find(function (playlist) {
+        return playlist.index == index;
+      });
+    }
+  }, {
+    key: 'setSelection',
+    value: function setSelection(data) {
+      switch (this.state.library.state) {
+        case "playlist":
+          // console.log("was");
+          // console.log(this.state.library.selectionSet.playlists);
+          if (data.whole || data.items) {
+            this.setState({ library: Object.assign({}, this.state.library, { selectionSet: Object.assign({}, this.state.library.selectionSet, {
+                  playlists: [].concat(_toConsumableArray(this.state.library.selectionSet.playlists), [data])
+                }) }) });
+          } else {
+            var toRemove = this.state.library.selectionSet.playlists.indexOf(this.getSelection(data.index));
+            var newList = this.state.library.selectionSet.playlists.slice();
+            newList.splice(toRemove, 1);
+            this.setState({ library: Object.assign({}, this.state.library, { selectionSet: Object.assign({}, this.state.library.selectionSet, {
+                  playlists: newList
+                }) }) });
+          }
+          break;
+        case "album":
+
+          break;
+      }
     }
     //Source can be provided either by event object or string
 
@@ -531,9 +599,103 @@ var MainSection = function (_React$Component) {
 
       if (!this.props.state.vkLogin) {
         (0, _utilities.loginVk)(function (token) {
-          return _this3.props.setLoginStatus({ vkLogin: token });
+          _this3.props.setLoginStatus({ vkLogin: token });
         });
       }
+      /*
+      $.ajax({
+        url: VK_AUDIO_URL,
+        // xhrFields: {
+        //   withCredentials: true
+        // },
+        method: "POST",
+        // dataType: "text",
+        data: {
+          act: "edit_album_box",
+          al: 1,
+          album_id:0,
+          oid: 70059105
+        },
+        success: (data) => {
+          console.log("Got hash");
+          console.log(data.substr(data.indexOf("hash")+7,18));
+          var hash = data.substr(data.indexOf("hash")+7,18);
+          $.ajax({
+            url: VK_AUDIO_URL,
+            // xhrFields: {
+            //   withCredentials: true
+            // },
+            method: "POST",
+            // dataType: "text",
+            data: {
+              Audios:"456239200,456239199",
+              act:"save_album",
+              al:1,
+              album_id:0,
+              gid:0,
+              hash:hash,
+              name:"Works"
+            },
+            success: () => {
+              console.log("Created playlist");
+            },
+            error: () => {
+              console.log("Error while creating");
+            }
+          });
+        },
+        error: () => {
+          console.log("Error while getting");
+        }
+      });
+      */
+
+      var query = "ain't nothing";
+      var aid;
+      var oid;
+      var hash;
+      $.ajax({
+        url: 'https://vk.com/search?c%5Bq%5D=' + query + '&c%5Bsection%5D=audio',
+        success: function success(data) {
+          console.log("loaded page");
+          // console.log(data);
+          var el = document.createElement('html');
+          el.innerHTML = data;
+          var parsed = JSON.parse(el.getElementsByClassName('audio_row')[0].dataset.audio);
+          aid = parsed[0];
+          oid = parsed[1];
+          hash = parsed[13].substr(0, 18); //18
+          console.log(parsed);
+          console.log(hash);
+
+          $.ajax({
+            url: _utilities.VK_AUDIO_URL,
+            // xhrFields: {
+            //   withCredentials: true
+            // },
+            method: "POST",
+            // dataType: "text",
+            data: {
+              act: "add",
+              aid: aid,
+              al: 1,
+              gid: 0,
+              hash: hash,
+              oid: oid
+            },
+            success: function success() {
+              console.log("Added song");
+              window.open("https://vk.com/audio");
+            },
+            error: function error() {
+              console.log("Error while adding");
+            }
+          });
+        },
+        error: function error() {
+          console.log("Error while loading");
+        }
+      });
     }
   }, {
     key: 'changeUrl',
@@ -684,13 +846,17 @@ var MainSection = function (_React$Component) {
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return React.createElement(_PlaylistList2.default, { token: this.props.state.spotifyLogin, state: this.state, setPlaylistList: function setPlaylistList(list, isAppend) {
+              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(data, remove) {
+                  return _this5.setSelection(data, remove);
+                }, token: this.props.state.spotifyLogin, state: this.state, setPlaylistList: function setPlaylistList(list, isAppend) {
                   return _this5.setPlaylistList(list, isAppend);
                 }, selectPlaylist: function selectPlaylist(indexx) {
                   return _this5.selectPlaylist(indexx);
                 } });
             case "album":
-              return React.createElement(_PlaylistList2.default, { token: this.props.state.spotifyLogin, state: this.state, setAlbumList: function setAlbumList(list, isAppend) {
+              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(data, remove) {
+                  return _this5.setSelection(data, remove);
+                }, token: this.props.state.spotifyLogin, state: this.state, setAlbumList: function setAlbumList(list, isAppend) {
                   return _this5.setAlbumList(list, isAppend);
                 }, selectAlbum: function selectAlbum(indexx) {
                   return _this5.selectAlbum(indexx);
@@ -731,15 +897,21 @@ var MainSection = function (_React$Component) {
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return React.createElement(_SongList2.default, { token: this.props.state.spotifyLogin, setPlaylistSonglist: function setPlaylistSonglist(list, isAppend) {
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
+                  return _this6.setSelection(data, remove);
+                }, token: this.props.state.spotifyLogin, setPlaylistSonglist: function setPlaylistSonglist(list, isAppend) {
                   return _this6.setPlaylistSonglist(list, isAppend);
                 }, state: this.state });
             case "album":
-              return React.createElement(_SongList2.default, { token: this.props.state.spotifyLogin, setAlbumSonglist: function setAlbumSonglist(list, isAppend) {
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
+                  return _this6.setSelection(data, remove);
+                }, token: this.props.state.spotifyLogin, setAlbumSonglist: function setAlbumSonglist(list, isAppend) {
                   return _this6.setAlbumSonglist(list, isAppend);
                 }, state: this.state });
             case "songs":
-              return React.createElement(_SongList2.default, { token: this.props.state.spotifyLogin, setSavedSonglist: function setSavedSonglist(list, isAppend) {
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
+                  return _this6.setSelection(data, remove);
+                }, token: this.props.state.spotifyLogin, setSavedSonglist: function setSavedSonglist(list, isAppend) {
                   return _this6.setSavedSonglist(list, isAppend);
                 }, state: this.state });
           }
@@ -859,10 +1031,10 @@ var App = function (_React$Component) {
 			chrome.cookies.onChanged.addListener(function (info) {
 				switch (info.cookie.name) {
 					case "access_token":
-						_this2.setState({ spotifyLogin: info.removed ? null : info.cookie.value });
+						info.cause != "overwrite" && _this2.setState({ spotifyLogin: info.removed ? null : info.cookie.value });
 						break;
 					case "vk_access_token":
-						_this2.setState({ vkLogin: info.removed ? null : info.cookie.value });
+						info.cause != "overwrite" && _this2.setState({ vkLogin: info.removed ? null : info.cookie.value });
 						break;
 				}
 			});
@@ -1382,16 +1554,21 @@ var PlaylistList = function (_React$Component) {
 	}, {
 		key: 'setListeners',
 		value: function setListeners() {
-			$('.main-section__playlist-summary').click(function (event) {
-				$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
-				$(this).addClass('main-section__playlist-summary_active');
-			});
-			$('.main-section__playlists-checkbox, .main-section__playlists-checkbox-label').click(function (event) {
-				event.stopPropagation();
-			});
-			$('.main-section__playlists-checkbox').change(function (event) {
-				if ($(this).parent().hasClass('main-section__playlist-summary_active')) if ($(this).prop("checked")) $('.main-section__song-checkbox').prop("checked", true);else $('.main-section__song-checkbox').prop("checked", false);
-			});
+			// $('.main-section__playlist-summary').click(function(event) {
+			//
+			//
+			// });
+			// $('.main-section__playlists-checkbox-label').click(function(event) {
+			// 	event.stopPropagation();
+			// });
+			// $('.main-section__playlists-checkbox').change(function(event) {
+			// 	if ($(this).parent().hasClass('main-section__playlist-summary_active'))
+			// 		if ($(this).prop("checked"))
+			// 			$('.main-section__song-checkbox').prop("checked", true);
+			// 		else
+			// 			$('.main-section__song-checkbox').prop("checked", false);
+			// 		}
+			// 	);
 		}
 	}, {
 		key: 'getUserPlaylists',
@@ -1436,6 +1613,32 @@ var PlaylistList = function (_React$Component) {
 			});
 		}
 	}, {
+		key: 'playlistClick',
+		value: function playlistClick(event, index) {
+			if (!event.target.classList.contains("main-section__playlists-checkbox") && !event.target.classList.contains("main-section__playlists-checkbox-label")) {
+				$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
+				$(event.target).closest(".main-section__playlist-summary").addClass('main-section__playlist-summary_active');
+				this.props.selectPlaylist(index);
+			}
+		}
+	}, {
+		key: 'setSelection',
+		value: function setSelection(e, index) {
+			if (e.target.checked) {
+				this.props.setSelection({
+					index: index,
+					whole: true
+				});
+				// console.log("Found");
+			} else {
+				// console.log("Not Found");
+				this.props.setSelection({
+					index: index,
+					whole: false
+				});
+			}
+		}
+	}, {
 		key: 'parsePlaylist',
 		value: function parsePlaylist(playlist, isActive) {
 			var _this4 = this;
@@ -1443,8 +1646,8 @@ var PlaylistList = function (_React$Component) {
 			var index = this.props.state.library.playlistList.items.indexOf(playlist);
 			return React.createElement(
 				'div',
-				{ key: playlist.id, className: "main-section__playlist-summary" + (isActive ? " main-section__playlist-summary_active" : ""), onClick: function onClick() {
-						return _this4.props.selectPlaylist(index);
+				{ key: playlist.id, className: "main-section__playlist-summary" + (isActive ? " main-section__playlist-summary_active" : ""), onClick: function onClick(e) {
+						return _this4.playlistClick(e, index);
 					} },
 				React.createElement('img', { className: 'main-section__playlist-cover', src: playlist.images.length ? playlist.images[0].url : "img/album art.jpg", alt: 'Album cover' }),
 				React.createElement(
@@ -1462,7 +1665,9 @@ var PlaylistList = function (_React$Component) {
 						playlist.owner.id
 					)
 				),
-				React.createElement('input', { id: playlist.id, className: 'main-section__playlists-checkbox css-checkbox', type: 'checkbox' }),
+				React.createElement('input', { id: playlist.id, className: 'main-section__playlists-checkbox css-checkbox', type: 'checkbox', onChange: function onChange(e) {
+						return _this4.setSelection(e, index);
+					} }),
 				React.createElement('label', { className: 'main-section__playlists-checkbox-label css-label', htmlFor: playlist.id })
 			);
 		}
@@ -1665,7 +1870,7 @@ exports.default = PlaylistList;
 /* WEBPACK VAR INJECTION */(function(React, $) {
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1689,400 +1894,409 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var SongList = function (_React$Component) {
-    _inherits(SongList, _React$Component);
+  _inherits(SongList, _React$Component);
 
-    function SongList() {
-        _classCallCheck(this, SongList);
+  function SongList() {
+    _classCallCheck(this, SongList);
 
-        return _possibleConstructorReturn(this, (SongList.__proto__ || Object.getPrototypeOf(SongList)).call(this));
+    return _possibleConstructorReturn(this, (SongList.__proto__ || Object.getPrototypeOf(SongList)).call(this));
+  }
+
+  _createClass(SongList, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {}
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      switch (this.props.state.library.state) {
+        case "playlist":
+          if (this.props.state.library.playlistSonglist) if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedPlaylist).find(".main-section__playlists-checkbox").prop("checked")) $('.main-section__song-checkbox').prop("checked", true);
+          break;
+        case "album":
+          if (this.props.state.library.albumSonglist) if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedAlbum).find(".main-section__playlists-checkbox").prop("checked")) $('.main-section__song-checkbox').prop("checked", true);
+          break;
+      }
+    }
+  }, {
+    key: 'shouldComponentUpdate',
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      if (nextProps.state.source == this.props.state.source) {
+        if (JSON.stringify(nextProps.state.library) == JSON.stringify(this.props.state.library)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }, {
+    key: 'songClickListener',
+    value: function songClickListener(e, id) {
+      var checkbox = document.getElementById(id).firstChild.firstChild;
+      if (e.target.className == "main-section__song-checkbox") {
+        if (checkbox.checked) {
+          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
+        } else {
+          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
+        }
+      } else {
+        checkbox.checked = !checkbox.checked;
+        if (!checkbox.checked) {
+          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
+        } else {
+          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
+        }
+      }
     }
 
-    _createClass(SongList, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {}
-    }, {
-        key: 'componentDidUpdate',
-        value: function componentDidUpdate() {}
-    }, {
-        key: 'shouldComponentUpdate',
-        value: function shouldComponentUpdate(nextProps, nextState) {
-            if (nextProps.state.source == this.props.state.source) {
-                if (JSON.stringify(nextProps.state.library) == JSON.stringify(this.props.state.library)) {
-                    return false;
-                }
-            }
-            return true;
+    // setListeners() {
+    // 	$('.main-section__song-row').click(function(event) {
+    // 		$(this).find('.main-section__song-checkbox').trigger('change');
+    // 	});
+    // 	$('.main-section__song-checkbox').change((event) => {
+    // 		if ($(event.target).is(':checked')) {
+    // 			$(event.target).prop('checked', false);
+    // 			if (this.props.state.source == "playlist")
+    // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', false);
+    // 			}
+    // 		else {
+    // 			$(event.target).prop("checked", true);
+    // 			if (this.props.state.source == "playlist" && this.isAllSongsChecked())
+    // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', true);
+    // 			}
+    // 		});
+    // }
+
+  }, {
+    key: 'isAllSongsChecked',
+    value: function isAllSongsChecked() {
+      var songs = document.getElementsByClassName('main-section__song-checkbox');
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = songs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var song = _step.value;
+
+          if (!song.checked) return false;
         }
-    }, {
-        key: 'songClickListener',
-        value: function songClickListener(e, id) {
-            var checkbox = document.getElementById(id).firstChild.firstChild;
-            if (e.target.className == "main-section__song-checkbox") {
-                if (checkbox.checked) {
-                    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
-                } else {
-                    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
-                }
-            } else {
-                checkbox.checked = !checkbox.checked;
-                if (!checkbox.checked) {
-                    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
-                } else {
-                    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
-                }
-            }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
         }
+      }
 
-        // setListeners() {
-        // 	$('.main-section__song-row').click(function(event) {
-        // 		$(this).find('.main-section__song-checkbox').trigger('change');
-        // 	});
-        // 	$('.main-section__song-checkbox').change((event) => {
-        // 		if ($(event.target).is(':checked')) {
-        // 			$(event.target).prop('checked', false);
-        // 			if (this.props.state.source == "playlist")
-        // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', false);
-        // 			}
-        // 		else {
-        // 			$(event.target).prop("checked", true);
-        // 			if (this.props.state.source == "playlist" && this.isAllSongsChecked())
-        // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', true);
-        // 			}
-        // 		});
-        // }
+      return true;
+    }
+  }, {
+    key: 'getPlaylist',
+    value: function getPlaylist(playlist, isAppend) {
+      var _this2 = this;
 
-    }, {
-        key: 'isAllSongsChecked',
-        value: function isAllSongsChecked() {
-            var songs = document.getElementsByClassName('main-section__song-checkbox');
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = songs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var song = _step.value;
-
-                    if (!song.checked) return false;
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
-
-            return true;
+      $.ajax({
+        url: isAppend ? this.props.state.library.playlistSonglist.next : 'https://api.spotify.com/v1/users/' + playlist.owner.id + '/playlists/' + playlist.id + '/tracks',
+        headers: {
+          'Authorization': 'Bearer ' + this.props.token
         }
-    }, {
-        key: 'getPlaylist',
-        value: function getPlaylist(playlist, isAppend) {
-            var _this2 = this;
+      }).done(function (songs) {
+        _this2.props.setPlaylistSonglist(songs, isAppend);
+      }).fail(function (xhr, status, errorThrown) {
+        (0, _utilities.refreshToken)(function () {
+          return _this2.getPlaylist(playlist, isAppend);
+        });
+        console.log("Error: " + errorThrown);
+        console.log("Status: " + status);
+        console.dir(xhr);
+      });
+    }
+  }, {
+    key: 'getAlbum',
+    value: function getAlbum(albumId, isAppend) {
+      var _this3 = this;
 
-            $.ajax({
-                url: isAppend ? this.props.state.library.playlistSonglist.next : 'https://api.spotify.com/v1/users/' + playlist.owner.id + '/playlists/' + playlist.id + '/tracks',
-                headers: {
-                    'Authorization': 'Bearer ' + this.props.token
-                }
-            }).done(function (songs) {
-                _this2.props.setPlaylistSonglist(songs, isAppend);
-            }).fail(function (xhr, status, errorThrown) {
-                (0, _utilities.refreshToken)(function () {
-                    return _this2.getPlaylist(playlist, isAppend);
-                });
-                console.log("Error: " + errorThrown);
-                console.log("Status: " + status);
-                console.dir(xhr);
-            });
+      $.ajax({
+        url: isAppend ? this.props.state.library.albumSonglist.next : 'https://api.spotify.com/v1/albums/' + albumId + '/tracks'
+      }).done(function (songs) {
+        _this3.props.setAlbumSonglist(songs, isAppend);
+      }).fail(function (xhr, status, errorThrown) {
+        (0, _utilities.refreshToken)(function () {
+          return _this3.getAlbum(albumId, isAppend);
+        });
+        console.log("Error: " + errorThrown);
+        console.log("Status: " + status);
+        console.dir(xhr);
+      });
+    }
+  }, {
+    key: 'getSavedSongs',
+    value: function getSavedSongs(isAppend) {
+      var _this4 = this;
+
+      $.ajax({
+        url: isAppend ? this.props.state.library.songlist.next : 'https://api.spotify.com/v1/me/tracks',
+        headers: {
+          'Authorization': 'Bearer ' + this.props.token
         }
-    }, {
-        key: 'getAlbum',
-        value: function getAlbum(albumId, isAppend) {
-            var _this3 = this;
+      }).done(function (songs) {
+        console.log(songs);
+        _this4.props.setSavedSonglist(songs, isAppend);
+      }).fail(function (xhr, status, errorThrown) {
+        (0, _utilities.refreshToken)(function () {
+          return _this4.getSavedSongs(isAppend);
+        });
+        console.log("Error: " + errorThrown);
+        console.log("Status: " + status);
+        console.dir(xhr);
+      });
+    }
+  }, {
+    key: 'convertDuration',
+    value: function convertDuration(ms) {
+      var mins = Math.floor(ms / 1000 / 60);
+      var secs = ms % (1000 * 60);
+      return mins + ':' + secs.toString().substring(0, 2);
+    }
+  }, {
+    key: 'parseArtists',
+    value: function parseArtists(song) {
+      var artists = "";
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
 
-            $.ajax({
-                url: isAppend ? this.props.state.library.albumSonglist.next : 'https://api.spotify.com/v1/albums/' + albumId + '/tracks'
-            }).done(function (songs) {
-                _this3.props.setAlbumSonglist(songs, isAppend);
-            }).fail(function (xhr, status, errorThrown) {
-                (0, _utilities.refreshToken)(function () {
-                    return _this3.getAlbum(albumId, isAppend);
-                });
-                console.log("Error: " + errorThrown);
-                console.log("Status: " + status);
-                console.dir(xhr);
-            });
+      try {
+        for (var _iterator2 = song.artists[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var artist = _step2.value;
+
+          artists += artist.name;
+          if (song.artists.indexOf(artist) != song.artists.length - 1) artists += ", ";
         }
-    }, {
-        key: 'getSavedSongs',
-        value: function getSavedSongs(isAppend) {
-            var _this4 = this;
-
-            $.ajax({
-                url: isAppend ? this.props.state.library.songlist.next : 'https://api.spotify.com/v1/me/tracks',
-                headers: {
-                    'Authorization': 'Bearer ' + this.props.token
-                }
-            }).done(function (songs) {
-                console.log(songs);
-                _this4.props.setSavedSonglist(songs, isAppend);
-            }).fail(function (xhr, status, errorThrown) {
-                (0, _utilities.refreshToken)(function () {
-                    return _this4.getSavedSongs(isAppend);
-                });
-                console.log("Error: " + errorThrown);
-                console.log("Status: " + status);
-                console.dir(xhr);
-            });
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
         }
-    }, {
-        key: 'convertDuration',
-        value: function convertDuration(ms) {
-            var mins = Math.floor(ms / 1000 / 60);
-            var secs = ms % (1000 * 60);
-            return mins + ':' + secs.toString().substring(0, 2);
+      }
+
+      return artists;
+    }
+  }, {
+    key: 'parseSong',
+    value: function parseSong(song) {
+      var _this5 = this;
+
+      return React.createElement(
+        'li',
+        { key: song.id, id: song.id, className: 'main-section__songs-row', onClick: function onClick(e) {
+            return _this5.songClickListener(e, song.id);
+          } },
+        React.createElement(
+          'div',
+          { className: 'main-section__songs-col main-section__check-col' },
+          React.createElement('input', { id: 'input', className: 'main-section__song-checkbox', type: 'checkbox' })
+        ),
+        React.createElement(
+          'div',
+          { className: "main-section__songs-col " + (this.props.state.library.state != "album" ? "main-section__song-col" : "main-section__song-wide-col") },
+          song.name
+        ),
+        React.createElement(
+          'div',
+          { className: 'main-section__songs-col main-section__artist-col' },
+          this.parseArtists(song)
+        ),
+        this.props.state.library.state != "album" && React.createElement(
+          'div',
+          { className: 'main-section__songs-col main-section__album-col' },
+          song.album.name
+        ),
+        React.createElement(
+          'div',
+          { className: 'main-section__songs-col main-section__duration-col' },
+          this.convertDuration(song.duration_ms)
+        )
+      );
+    }
+  }, {
+    key: 'loadMore',
+    value: function loadMore() {
+      switch (this.props.state.library.state) {
+        case "playlist":
+          this.getPlaylist(this.props.state.library.playlistList.items[this.props.state.library.selectedPlaylist], true);
+          break;
+        case "album":
+          this.getAlbum(this.props.state.library.albumList.items[this.props.state.library.selectedAlbum].album.id, true);
+          break;
+        case "songs":
+          this.getSavedSongs(true);
+          break;
+      }
+    }
+  }, {
+    key: 'hasMore',
+    value: function hasMore() {
+      switch (this.props.state.library.state) {
+        case "playlist":
+          return (0, _utilities.hasMore)(this.props.state.library.playlistSonglist);
+          break;
+        case "album":
+          return (0, _utilities.hasMore)(this.props.state.library.albumSonglist);
+          break;
+        case "songs":
+          return (0, _utilities.hasMore)(this.props.state.library.songlist);
+          break;
+      }
+    }
+  }, {
+    key: 'renderPlaylist',
+    value: function renderPlaylist(playlist) {
+      var _this6 = this;
+
+      var songs = [];
+      var list = this.props.state.library.state == "songs" ? playlist.items : playlist.items;
+      if (this.props.state.source == "url") list = playlist.tracks.items;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = list[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var song = _step3.value;
+
+          if (this.props.state.library.state == "album") songs.push(this.parseSong(song));else songs.push(this.parseSong(song.track));
         }
-    }, {
-        key: 'parseArtists',
-        value: function parseArtists(song) {
-            var artists = "";
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = song.artists[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var artist = _step2.value;
-
-                    artists += artist.name;
-                    if (song.artists.indexOf(artist) != song.artists.length - 1) artists += ", ";
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-
-            return artists;
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
         }
-    }, {
-        key: 'parseSong',
-        value: function parseSong(song) {
-            var _this5 = this;
+      }
 
-            return React.createElement(
-                'li',
-                { key: song.id, id: song.id, className: 'main-section__songs-row', onClick: function onClick(e) {
-                        return _this5.songClickListener(e, song.id);
-                    } },
-                React.createElement(
-                    'div',
-                    { className: 'main-section__songs-col main-section__check-col' },
-                    React.createElement('input', { id: 'input', className: 'main-section__song-checkbox', type: 'checkbox' })
-                ),
-                React.createElement(
-                    'div',
-                    { className: "main-section__songs-col " + (this.props.state.library.state != "album" ? "main-section__song-col" : "main-section__song-wide-col") },
-                    song.name
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'main-section__songs-col main-section__artist-col' },
-                    this.parseArtists(song)
-                ),
-                this.props.state.library.state != "album" && React.createElement(
-                    'div',
-                    { className: 'main-section__songs-col main-section__album-col' },
-                    song.album.name
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'main-section__songs-col main-section__duration-col' },
-                    this.convertDuration(song.duration_ms)
-                )
-            );
-        }
-    }, {
-        key: 'loadMore',
-        value: function loadMore() {
-            switch (this.props.state.library.state) {
-                case "playlist":
-                    this.getPlaylist(this.props.state.library.playlistList.items[this.props.state.library.selectedPlaylist], true);
-                    break;
-                case "album":
-                    this.getAlbum(this.props.state.library.albumList.items[this.props.state.library.selectedAlbum].album.id, true);
-                    break;
-                case "songs":
-                    this.getSavedSongs(true);
-                    break;
-            }
-        }
-    }, {
-        key: 'hasMore',
-        value: function hasMore() {
-            switch (this.props.state.library.state) {
-                case "playlist":
-                    return (0, _utilities.hasMore)(this.props.state.library.playlistSonglist);
-                    break;
-                case "album":
-                    return (0, _utilities.hasMore)(this.props.state.library.albumSonglist);
-                    break;
-                case "songs":
-                    return (0, _utilities.hasMore)(this.props.state.library.songlist);
-                    break;
-            }
-        }
-    }, {
-        key: 'renderPlaylist',
-        value: function renderPlaylist(playlist) {
-            var _this6 = this;
+      return React.createElement(
+        'section',
+        { className: 'main-section__songs' },
+        React.createElement(
+          'div',
+          { className: 'main-section__songs-header main-section__songs-row' },
+          React.createElement(
+            'div',
+            { className: 'main-section__songs-col main-section__check-col' },
+            'C'
+          ),
+          React.createElement(
+            'div',
+            { className: "main-section__songs-col " + (this.props.state.library.state != "album" ? "main-section__song-col" : "main-section__song-wide-col") },
+            'Song'
+          ),
+          React.createElement(
+            'div',
+            { className: 'main-section__songs-col main-section__artist-col' },
+            'Artist'
+          ),
+          this.props.state.library.state != "album" && React.createElement(
+            'div',
+            { className: 'main-section__songs-col main-section__album-col' },
+            'Album'
+          ),
+          React.createElement(
+            'div',
+            { className: 'main-section__songs-col main-section__duration-col' },
+            'Duration'
+          )
+        ),
+        React.createElement(
+          'ul',
+          { className: 'main-section__songs-list' },
+          React.createElement(
+            _reactInfiniteScroller2.default,
+            { pageStart: 0, loadMore: function loadMore() {
+                return _this6.loadMore();
+              }, hasMore: this.hasMore(), loader: React.createElement(
+                'div',
+                { className: 'loader main-section__songs-row' },
+                ' Loading ...'
+              ), useWindow: false },
+            songs
+          )
+        )
+      );
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      console.log("SongList render!!!!!!!");
+      switch (this.props.state.source) {
 
-            var songs = [];
-            var list = this.props.state.library.state == "songs" ? playlist.items : playlist.items;
-            if (this.props.state.source == "url") list = playlist.tracks.items;
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
+        case "url":
+          return this.renderPlaylist(this.props.state.url.songlist);
+        case "library":
+          switch (this.props.state.library.state) {
+            case "playlist":
+              if (!this.props.state.library.playlistSonglist) {
+                if (this.props.state.library.playlistList) this.getPlaylist(this.props.state.library.playlistList.items[this.props.state.library.selectedPlaylist]);
+                return React.createElement(
+                  'h3',
+                  { className: 'main-section__status-message' },
+                  'Loading songs...'
+                );
+              }
+              return this.renderPlaylist(this.props.state.library.playlistSonglist);
+            case "album":
+              if (!this.props.state.library.albumSonglist) {
+                if (this.props.state.library.albumList) this.getAlbum(this.props.state.library.albumList.items[this.props.state.library.selectedAlbum].album.id);
+                return React.createElement(
+                  'h3',
+                  { className: 'main-section__status-message' },
+                  'Loading songs...'
+                );
+              }
+              return this.renderPlaylist(this.props.state.library.albumSonglist);
+            case "songs":
+              if (!this.props.state.library.songlist) {
+                this.getSavedSongs();
+                return React.createElement(
+                  'h3',
+                  { className: 'main-section__status-message' },
+                  'Loading songs...'
+                );
+              }
+              return this.renderPlaylist(this.props.state.library.songlist);
+          }
+        default:
+          return React.createElement(
+            'h3',
+            null,
+            'Undefined'
+          );
+      }
+    }
+  }]);
 
-            try {
-                for (var _iterator3 = list[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var song = _step3.value;
-
-                    if (this.props.state.library.state == "album") songs.push(this.parseSong(song));else songs.push(this.parseSong(song.track));
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-
-            return React.createElement(
-                'section',
-                { className: 'main-section__songs' },
-                React.createElement(
-                    'div',
-                    { className: 'main-section__songs-header main-section__songs-row' },
-                    React.createElement(
-                        'div',
-                        { className: 'main-section__songs-col main-section__check-col' },
-                        'C'
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: "main-section__songs-col " + (this.props.state.library.state != "album" ? "main-section__song-col" : "main-section__song-wide-col") },
-                        'Song'
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'main-section__songs-col main-section__artist-col' },
-                        'Artist'
-                    ),
-                    this.props.state.library.state != "album" && React.createElement(
-                        'div',
-                        { className: 'main-section__songs-col main-section__album-col' },
-                        'Album'
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'main-section__songs-col main-section__duration-col' },
-                        'Duration'
-                    )
-                ),
-                React.createElement(
-                    'ul',
-                    { className: 'main-section__songs-list' },
-                    React.createElement(
-                        _reactInfiniteScroller2.default,
-                        { pageStart: 0, loadMore: function loadMore() {
-                                return _this6.loadMore();
-                            }, hasMore: this.hasMore(), loader: React.createElement(
-                                'div',
-                                { className: 'loader main-section__songs-row' },
-                                ' Loading ...'
-                            ), useWindow: false },
-                        songs
-                    )
-                )
-            );
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            console.log("SongList render!!!!!!!");
-            switch (this.props.state.source) {
-
-                case "url":
-                    return this.renderPlaylist(this.props.state.url.songlist);
-                case "library":
-                    switch (this.props.state.library.state) {
-                        case "playlist":
-                            if (!this.props.state.library.playlistSonglist) {
-                                if (this.props.state.library.playlistList) this.getPlaylist(this.props.state.library.playlistList.items[this.props.state.library.selectedPlaylist]);
-                                return React.createElement(
-                                    'h3',
-                                    { className: 'main-section__status-message' },
-                                    'Loading songs...'
-                                );
-                            }
-                            return this.renderPlaylist(this.props.state.library.playlistSonglist);
-                        case "album":
-                            if (!this.props.state.library.albumSonglist) {
-                                if (this.props.state.library.albumList) this.getAlbum(this.props.state.library.albumList.items[this.props.state.library.selectedAlbum].album.id);
-                                return React.createElement(
-                                    'h3',
-                                    { className: 'main-section__status-message' },
-                                    'Loading songs...'
-                                );
-                            }
-                            return this.renderPlaylist(this.props.state.library.albumSonglist);
-                        case "songs":
-                            if (!this.props.state.library.songlist) {
-                                this.getSavedSongs();
-                                return React.createElement(
-                                    'h3',
-                                    { className: 'main-section__status-message' },
-                                    'Loading songs...'
-                                );
-                            }
-                            return this.renderPlaylist(this.props.state.library.songlist);
-                    }
-                default:
-                    return React.createElement(
-                        'h3',
-                        null,
-                        'Undefined'
-                    );
-            }
-        }
-    }]);
-
-    return SongList;
+  return SongList;
 }(React.Component);
 
 exports.default = SongList;

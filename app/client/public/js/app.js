@@ -35,10 +35,10 @@ class App extends React.Component {
 		chrome.cookies.onChanged.addListener((info)=>{
 			switch (info.cookie.name) {
 				case "access_token":
-					this.setState({spotifyLogin: info.removed?null:info.cookie.value});
+					info.cause!="overwrite" && this.setState({spotifyLogin: info.removed?null:info.cookie.value});
 					break;
 				case "vk_access_token":
-					this.setState({vkLogin: info.removed?null:info.cookie.value});
+					info.cause!="overwrite" && this.setState({vkLogin: info.removed ?null:info.cookie.value});
 					break;
 			}
 		})
