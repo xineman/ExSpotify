@@ -9,19 +9,48 @@ export default class SongList extends React.Component {
   componentDidMount() {}
 
   componentDidUpdate() {
-    switch (this.props.state.library.state) {
-      case "playlist":
-        if (this.props.state.library.playlistSonglist)
-          if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedPlaylist).find(".main-section__playlists-checkbox").prop("checked"))
-            $('.main-section__song-checkbox').prop("checked", true);
-        break;
-      case "album":
-        if (this.props.state.library.albumSonglist)
-          if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedAlbum).find(".main-section__playlists-checkbox").prop("checked"))
-            $('.main-section__song-checkbox').prop("checked", true);
-        break;
+    var songs = document.querySelectorAll('.main-section__songs-row:not(.songs-loader)');
+    var selection;
+    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) {
+      //getting selection information for playlist or album
+      switch (this.props.state.library.state) {
+        case "playlist":
+          listIndex = this.props.state.library.selectedPlaylist;
+          break;
+        case "album":
+          listIndex = this.props.state.library.selectedAlbum;
+          break;
+      }
+      var listIndex;
+      selection = this.getSelection(this.props.state.library.state, listIndex);
+    } else {
+      //getting selection information for saved songs or for playlist, loaded from url.
+      let source;
+      if (this.props.state.source == "library") {
+        source = "songs";
+      } else {
+        source = "url";
+      }
+      selection = this.props.state.selectionSet[source].length
+        ? this.props.state.selectionSet[source][0]
+        : null;
     }
-
+    // console.log(selection);
+    if (selection) {
+      if (selection.whole) {
+        $('.main-section__song-checkbox').prop("checked", true);
+        // console.log("There is whole");
+      } else if (selection.items) {
+        // console.log("There are items");
+        // console.log(selection.items);
+        for (var i = 0; i < songs.length; i++) {
+          if (~ selection.items.indexOf(i)) {
+            songs[i + 1].firstChild.firstChild.checked = true;
+            // console.log("Found " + i);
+          }
+        }
+      }
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -32,48 +61,59 @@ export default class SongList extends React.Component {
     }
     return true;
   }
-
-  songClickListener(e, id) {
-    let checkbox = document.getElementById(id).firstChild.firstChild;
-    if (e.target.className == "main-section__song-checkbox") {
-      if (checkbox.checked) {
-        if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked())
-          document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
-        }
-      else {
-        if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album"))
-          document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
-        }
-      } else {
-      checkbox.checked = !checkbox.checked;
-      if (!checkbox.checked) {
-        if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album"))
-          document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
-        }
-      else {
-        if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked())
-          document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
-        }
-      }
+  getSelection(source, index) {
+    return this.props.state.selectionSet[source].find(function(playlist) {
+      return playlist.index == index;
+    });
   }
-
-  // setListeners() {
-  // 	$('.main-section__song-row').click(function(event) {
-  // 		$(this).find('.main-section__song-checkbox').trigger('change');
-  // 	});
-  // 	$('.main-section__song-checkbox').change((event) => {
-  // 		if ($(event.target).is(':checked')) {
-  // 			$(event.target).prop('checked', false);
-  // 			if (this.props.state.source == "playlist")
-  // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', false);
-  // 			}
-  // 		else {
-  // 			$(event.target).prop("checked", true);
-  // 			if (this.props.state.source == "playlist" && this.isAllSongsChecked())
-  // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', true);
-  // 			}
-  // 		});
-  // }
+  //TODO implement changing selectionSet for songs only
+  songClickListener(e, index) {
+    var listIndex;
+    switch (this.props.state.library.state) {
+      case "playlist":
+        listIndex = this.props.state.library.selectedPlaylist;
+        break;
+      case "album":
+        listIndex = this.props.state.library.selectedAlbum;
+        break;
+    }
+    let checkbox = document.getElementsByClassName('main-section__songs-row')[++index].firstChild.firstChild;
+    if (e.target.className != "main-section__song-checkbox") {
+      checkbox.checked = !checkbox.checked;
+    }
+    let isWhole = this.isAllSongsChecked();
+    if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) {
+      document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = isWhole;
+      if (isWhole) {
+        this.props.setSelection(this.props.state.library.state, {
+          index: listIndex,
+          whole: true
+        });
+      } else {
+        var selectedSongs = this.getSelectedSongsArray();
+        this.props.setSelection(this.props.state.library.state, {
+          index: listIndex,
+          whole: false,
+          items: selectedSongs.length
+            ? selectedSongs
+            : null
+        });
+      }
+    } else {
+      var selectedSongs = this.getSelectedSongsArray();
+      var source;
+      if (this.props.state.source == "library") {
+        source = "songs";
+      } else {
+        source = "url";
+      }
+      this.props.setSelection(source, {
+        items: selectedSongs.length
+          ? selectedSongs
+          : null
+      });
+    }
+  }
 
   isAllSongsChecked() {
     var songs = document.getElementsByClassName('main-section__song-checkbox');
@@ -82,6 +122,17 @@ export default class SongList extends React.Component {
         return false;
       }
     return true;
+  }
+
+  getSelectedSongsArray() {
+    var songs = document.querySelectorAll('.main-section__songs-row:not(.songs-loader)');
+    var indexes = [];
+    for (var i = 1; i < songs.length; i++) {
+      let checkbox = songs[i].firstChild.firstChild;
+      if (checkbox.checked)
+        indexes.push(i - 1);
+      }
+    return indexes;
   }
 
   getPlaylist(playlist, isAppend) {
@@ -150,9 +201,35 @@ export default class SongList extends React.Component {
       }
     return artists;
   }
-  parseSong(song) {
+  parseSong(item) {
+    let song;
+    var index;
+    switch (this.props.state.source) {
+      case "library":
+        switch (this.props.state.library.state) {
+          case "playlist":
+            index = this.props.state.library.playlistSonglist.items.indexOf(item);
+            song = item.track;
+            break;
+          case "album":
+            index = this.props.state.library.albumSonglist.items.indexOf(item);
+            song = item;
+            break;
+          case "songs":
+            index = this.props.state.library.songlist.items.indexOf(item);
+            song = item.track;
+            break;
+          default:
+            song = item;
+        }
+        break;
+      case "url":
+        index = this.props.state.url.songlist.tracks.items.indexOf(item);
+        song = item.track;
+        break;
+    }
     return (
-      <li key={song.id} id={song.id} className="main-section__songs-row" onClick={(e) => this.songClickListener(e, song.id)}>
+      <li key={song.id} className="main-section__songs-row" onClick={(e) => this.songClickListener(e, index)}>
         <div className="main-section__songs-col main-section__check-col"><input id="input" className="main-section__song-checkbox" type="checkbox"/></div>
         <div className={"main-section__songs-col " + (this.props.state.library.state != "album"
           ? "main-section__song-col"
@@ -191,17 +268,11 @@ export default class SongList extends React.Component {
   }
   renderPlaylist(playlist) {
     var songs = [];
-    var list = this.props.state.library.state == "songs"
-      ? playlist.items
-      : playlist.items;
+    var list = playlist.items;
     if (this.props.state.source == "url")
       list = playlist.tracks.items;
-    for (let song of list) {
-      if (this.props.state.library.state == "album")
-        songs.push(this.parseSong(song));
-      else
-        songs.push(this.parseSong(song.track));
-      }
+    for (let song of list)
+      songs.push(this.parseSong(song));
     return (
       <section className="main-section__songs">
         <div className="main-section__songs-header main-section__songs-row">
@@ -214,7 +285,7 @@ export default class SongList extends React.Component {
           <div className="main-section__songs-col main-section__duration-col">Duration</div>
         </div>
         <ul className="main-section__songs-list">
-          <InfiniteScroll pageStart={0} loadMore={() => this.loadMore()} hasMore={this.hasMore()} loader={< div className = "loader main-section__songs-row" > Loading ...</div>} useWindow={false}>
+          <InfiniteScroll pageStart={0} loadMore={() => this.loadMore()} hasMore={this.hasMore()} loader={< div className = "songs-loader main-section__songs-row" > Loading ...</div>} useWindow={false}>
             {songs}
           </InfiniteScroll>
         </ul>

@@ -22,29 +22,19 @@ export default class PlaylistList extends React.Component {
 		return true;
 	}
 	componentDidMount() {
-		this.setListeners();
+		this.loadSelection();
 	}
 
 	componentDidUpdate() {
-		this.setListeners();
+		this.loadSelection();
 	}
 
-	setListeners() {
-		// $('.main-section__playlist-summary').click(function(event) {
-		//
-		//
-		// });
-		// $('.main-section__playlists-checkbox-label').click(function(event) {
-		// 	event.stopPropagation();
-		// });
-		// $('.main-section__playlists-checkbox').change(function(event) {
-		// 	if ($(this).parent().hasClass('main-section__playlist-summary_active'))
-		// 		if ($(this).prop("checked"))
-		// 			$('.main-section__song-checkbox').prop("checked", true);
-		// 		else
-		// 			$('.main-section__song-checkbox').prop("checked", false);
-		// 		}
-		// 	);
+	loadSelection() {
+		var lists = document.querySelectorAll('.main-section__playlist-summary:not(.loader)');
+		var selection = this.props.state.selectionSet[this.props.state.library.state];
+		for (let s of selection) {
+			if (s.whole) lists[s.index].childNodes[2].checked = true;
+		}
 	}
 	getUserPlaylists(isAppend) {
 		$.ajax({
@@ -81,23 +71,21 @@ export default class PlaylistList extends React.Component {
 		if (!event.target.classList.contains("main-section__playlists-checkbox")&& !event.target.classList.contains("main-section__playlists-checkbox-label")) {
 			$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
 			$(event.target).closest(".main-section__playlist-summary").addClass('main-section__playlist-summary_active');
-			this.props.selectPlaylist(index);
+			if (this.props.state.library.state == "playlist") {
+				this.props.selectPlaylist(index);
+			} else
+				this.props.selectAlbum(index)
+		} else {
+			this.setSelection(event, index);
 		}
 	}
 	setSelection(e,index) {
-		if (e.target.checked) {
-			this.props.setSelection({
-				index: index,
-				whole: true
-			});
-			// console.log("Found");
-		} else {
-			// console.log("Not Found");
-			this.props.setSelection({
-				index: index,
-				whole: false
-			});
-		}
+		if ($(e.target).parent().hasClass('main-section__playlist-summary_active'))
+			$('.main-section__song-checkbox').prop("checked", e.target.checked);
+		this.props.setSelection(this.props.state.library.state, {
+			index: index,
+			whole: e.target.checked
+		});
 	}
 
 
@@ -114,8 +102,8 @@ export default class PlaylistList extends React.Component {
 					<h3 className="main-section__playlist-name">{playlist.name}</h3>
 					<h4 className="main-section__playlist-author">by {playlist.owner.id}</h4>
 				</div>
-				<input id={playlist.id} className="main-section__playlists-checkbox css-checkbox" type="checkbox" onChange={(e) => this.setSelection(e,index)}/>
-				{/* value={this.getSelection(index)}  */}
+				<input id={playlist.id} className="main-section__playlists-checkbox css-checkbox" type="checkbox"/>
+				{/* value={this.getSelection(index)}  onChange={(e) => this.setSelection(e,index)}*/}
 				<label className="main-section__playlists-checkbox-label css-label" htmlFor={playlist.id}></label>
 			</div>
 		);
@@ -152,7 +140,7 @@ export default class PlaylistList extends React.Component {
 		return (
 			<div key={album.id} className={"main-section__playlist-summary" + (isActive
 				? " main-section__playlist-summary_active"
-				: "")} onClick={() => this.props.selectAlbum(index)}>
+				: "")} onClick={(e) => this.playlistClick(e, index)}>
 				<img className="main-section__playlist-cover" src={album.images.length>2
 					? album.images[2].url
 					: album.images[0].url} alt="Album cover"/>

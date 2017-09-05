@@ -1,4 +1,4 @@
-import {refreshToken, loginVk, VK_AUDIO_URL} from '../utilities.js';
+import {refreshToken, loginVk, VK_AUDIO_URL, PROJECT_URL} from '../utilities.js';
 import MainHeader from './mainSection/MainHeader.js';
 import SongList from './mainSection/SongList.js';
 import PlaylistList from './mainSection/PlaylistList.js';
@@ -18,16 +18,7 @@ export default class MainSection extends React.Component {
         playlistSonglist: null,
         albumSonglist: null,
         selectedPlaylist: null,
-        selectedAlbum: null,
-        selectionSet: {
-          playlists: [
-            // {
-            //   index: 0,
-            //   whole: false,
-            //   items: []
-            // }
-          ]
-        }
+        selectedAlbum: null
       },
       popular: {
         state: "intro",
@@ -36,6 +27,18 @@ export default class MainSection extends React.Component {
       url: {
         state: "intro", //states: intro, loading, playlist
         songlist: null
+      },
+      selectionSet: {
+        playlist: [
+          // {
+          //   index: 0, //playlist or album index. Only playlists that have selection are added to selectionSet
+          //   whole: false, //if all the songs are checked
+          //   items: [] //indexes of checked songs
+          // }
+        ],
+        album: [],
+        songs: [],
+        url: []
       }
     }
   }
@@ -51,38 +54,31 @@ export default class MainSection extends React.Component {
   componentDidUpdate() {
 
     console.log("Now");
-    console.log(this.state.library.selectionSet.playlists);
+    console.log(this.state.selectionSet);
   }
-  getSelection(index) {
-		return this.state.library.selectionSet.playlists.find(function(playlist){
-  		return playlist.index==index;
-		});
-	}
-  setSelection(data) {
-    switch (this.state.library.state) {
+
+  getSelection(source, index) {
+    return this.state.selectionSet[source].find(function(playlist) {
+      return playlist.index == index;
+    });
+  }
+
+  setSelection(source, data) {
+    var newList = [];
+    switch (source) {
       case "playlist":
-        // console.log("was");
-        // console.log(this.state.library.selectionSet.playlists);
-        if (data.whole || data.items) {
-          this.setState({library: Object.assign({}, this.state.library, {selectionSet: Object.assign({}, this.state.library.selectionSet, {
-                playlists: [
-                  ...this.state.library.selectionSet.playlists,
-                  data
-                ]
-              })})});
-        } else {
-          var toRemove = this.state.library.selectionSet.playlists.indexOf(this.getSelection(data.index));
-          var newList = this.state.library.selectionSet.playlists.slice();
+      case "album":
+        newList = this.state.selectionSet[source].slice();
+        if (this.getSelection(source, data.index)) {
+          var toRemove = this.state.selectionSet[source].indexOf(this.getSelection(source, data.index));
           newList.splice(toRemove, 1);
-          this.setState({library: Object.assign({}, this.state.library, {selectionSet: Object.assign({}, this.state.library.selectionSet, {
-                playlists: newList
-              })})});
         }
         break;
-      case "album":
-
-        break;
     }
+    if (data.whole || data.items) {
+      newList.push(data);
+    }
+    this.setState({selectionSet: Object.assign({}, this.state.selectionSet, {[source]: newList})});
   }
   //Source can be provided either by event object or string
   changeSource(event, source) {
@@ -190,11 +186,11 @@ export default class MainSection extends React.Component {
           // dataType: "text",
           data: {
             act: "add",
-            aid: aid,
+            aid: aid,//audio_id
             al: 1,
-            gid: 0,
+            gid: 0,//group_id
             hash: hash,
-            oid: oid
+            oid: oid//audio_owner_id
           },
           success: () => {
             console.log("Added song");
@@ -236,7 +232,7 @@ export default class MainSection extends React.Component {
       this.setState({library: Object.assign({}, this.state.library, {
           playlistList: list,
           selectedPlaylist: 0
-        })});
+        }), selectionSet: Object.assign({}, this.state.selectionSet, {playlist: []})});
     }
 
   setAlbumList(list, isAppend) {
@@ -252,7 +248,7 @@ export default class MainSection extends React.Component {
       this.setState({library: Object.assign({}, this.state.library, {
           albumList: list,
           selectedAlbum: 0
-        })});
+        }), selectionSet: Object.assign({}, this.state.selectionSet, {album: []})});
     }
 
   setPlaylistSonglist(list, isAppend) {
@@ -293,7 +289,7 @@ export default class MainSection extends React.Component {
             next: list.next
           })})});
     } else {
-      this.setState({library: Object.assign({}, this.state.library, {songlist: list})});
+      this.setState({library: Object.assign({}, this.state.library, {songlist: list}), selectionSet: Object.assign({}, this.state.selectionSet, {songs: []})});
     }
   }
 
@@ -332,17 +328,16 @@ export default class MainSection extends React.Component {
   }
   getPublicPlaylist(playlistUrl) {
     this.ajaxRequest = $.ajax({
-      url: "/get-playlist",
+      url: PROJECT_URL + "get-playlist",
       data: {
         playlistUrl: playlistUrl
       }
     }).done((playlist) => {
-      console.log(playlist);
       this.setState({
         url: {
           state: "playlist",
           songlist: playlist
-        }
+        }, selectionSet: Object.assign({}, this.state.selectionSet, {url: []})
       });
       // $(".content-header__url-playlist-name").text(playlist.name);
     }).fail((xhr, status, errorThrown) => {
@@ -350,7 +345,7 @@ export default class MainSection extends React.Component {
         url: {
           state: "intro",
           songlist: null
-        }
+        }, selectionSet: Object.assign({}, this.state.selectionSet, {url: []})
       });
       console.log("Error: " + errorThrown);
       console.log("Status: " + status);
@@ -364,9 +359,9 @@ export default class MainSection extends React.Component {
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return (<PlaylistList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
+              return (<PlaylistList setSelection={(source, data) => this.setSelection(source, data)} token={this.props.state.spotifyLogin} state={this.state} setPlaylistList={(list, isAppend) => this.setPlaylistList(list, isAppend)} selectPlaylist={(indexx) => this.selectPlaylist(indexx)}/>);
             case "album":
-              return (<PlaylistList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} state={this.state} setAlbumList={(list, isAppend) => this.setAlbumList(list, isAppend)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
+              return (<PlaylistList setSelection={(source, data) => this.setSelection(source, data)} token={this.props.state.spotifyLogin} state={this.state} setAlbumList={(list, isAppend) => this.setAlbumList(list, isAppend)} selectAlbum={(indexx) => this.selectAlbum(indexx)}/>);
           }
         default:
       }
@@ -392,16 +387,16 @@ export default class MainSection extends React.Component {
               <h3 className="main-section__status-message">Loading from URL...</h3>
             );
           default:
-            return (<SongList state={this.state}/>);
+            return (<SongList setSelection={(source, data) => this.setSelection(source, data)} state={this.state}/>);
         }
       case "library":
         switch (this.state.library.state) {
           case "playlist":
-            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(source, data) => this.setSelection(source, data)} token={this.props.state.spotifyLogin} setPlaylistSonglist={(list, isAppend) => this.setPlaylistSonglist(list, isAppend)} state={this.state}/>);
           case "album":
-            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(source, data) => this.setSelection(source, data)} token={this.props.state.spotifyLogin} setAlbumSonglist={(list, isAppend) => this.setAlbumSonglist(list, isAppend)} state={this.state}/>);
           case "songs":
-            return (<SongList setSelection={(data, remove) => this.setSelection(data, remove)} token={this.props.state.spotifyLogin} setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
+            return (<SongList setSelection={(source, data) => this.setSelection(source, data)} token={this.props.state.spotifyLogin} setSavedSonglist={(list, isAppend) => this.setSavedSonglist(list, isAppend)} state={this.state}/>);
         }
     }
   }

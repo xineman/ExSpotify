@@ -43,18 +43,22 @@ function getCookie(cname) {
 	return null;
 }
 
-function refreshToken(callback) {
+function refreshToken(callback, fail) {
 	chrome.cookies.get({ url: "http://localhost", name: "refresh_token" }, function (cookie) {
-		console.log("Going to refresh token");
-		$.ajax({
-			url: PROJECT_URL + "refresh_token",
-			data: {
-				refresh_token: cookie.value
-			}
-		}).done(function (data) {
-			console.log("Refreshed");
-			callback();
-		});
+		if (cookie) {
+			console.log("Going to refresh token");
+			$.ajax({
+				url: PROJECT_URL + "refresh_token",
+				data: {
+					refresh_token: cookie.value
+				}
+			}).done(function (data) {
+				console.log("Refreshed");
+				callback();
+			});
+		} else {
+			// fail();
+		}
 	});
 }
 
@@ -467,6 +471,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -492,16 +498,7 @@ var MainSection = function (_React$Component) {
         playlistSonglist: null,
         albumSonglist: null,
         selectedPlaylist: null,
-        selectedAlbum: null,
-        selectionSet: {
-          playlists: [
-            // {
-            //   index: 0,
-            //   whole: false,
-            //   items: []
-            // }
-          ]
-        }
+        selectedAlbum: null
       },
       popular: {
         state: "intro",
@@ -510,6 +507,18 @@ var MainSection = function (_React$Component) {
       url: {
         state: "intro", //states: intro, loading, playlist
         songlist: null
+      },
+      selectionSet: {
+        playlist: [
+          // {
+          //   index: 0, //playlist or album index. Only playlists that have selection are added to selectionSet
+          //   whole: false, //if all the songs are checked
+          //   items: [] //indexes of checked songs
+          // }
+        ],
+        album: [],
+        songs: [],
+        url: []
       }
     };
     return _this;
@@ -532,39 +541,33 @@ var MainSection = function (_React$Component) {
     value: function componentDidUpdate() {
 
       console.log("Now");
-      console.log(this.state.library.selectionSet.playlists);
+      console.log(this.state.selectionSet);
     }
   }, {
     key: 'getSelection',
-    value: function getSelection(index) {
-      return this.state.library.selectionSet.playlists.find(function (playlist) {
+    value: function getSelection(source, index) {
+      return this.state.selectionSet[source].find(function (playlist) {
         return playlist.index == index;
       });
     }
   }, {
     key: 'setSelection',
-    value: function setSelection(data) {
-      switch (this.state.library.state) {
+    value: function setSelection(source, data) {
+      var newList = [];
+      switch (source) {
         case "playlist":
-          // console.log("was");
-          // console.log(this.state.library.selectionSet.playlists);
-          if (data.whole || data.items) {
-            this.setState({ library: Object.assign({}, this.state.library, { selectionSet: Object.assign({}, this.state.library.selectionSet, {
-                  playlists: [].concat(_toConsumableArray(this.state.library.selectionSet.playlists), [data])
-                }) }) });
-          } else {
-            var toRemove = this.state.library.selectionSet.playlists.indexOf(this.getSelection(data.index));
-            var newList = this.state.library.selectionSet.playlists.slice();
+        case "album":
+          newList = this.state.selectionSet[source].slice();
+          if (this.getSelection(source, data.index)) {
+            var toRemove = this.state.selectionSet[source].indexOf(this.getSelection(source, data.index));
             newList.splice(toRemove, 1);
-            this.setState({ library: Object.assign({}, this.state.library, { selectionSet: Object.assign({}, this.state.library.selectionSet, {
-                  playlists: newList
-                }) }) });
           }
           break;
-        case "album":
-
-          break;
       }
+      if (data.whole || data.items) {
+        newList.push(data);
+      }
+      this.setState({ selectionSet: Object.assign({}, this.state.selectionSet, _defineProperty({}, source, newList)) });
     }
     //Source can be provided either by event object or string
 
@@ -720,7 +723,7 @@ var MainSection = function (_React$Component) {
           }) }) });else this.setState({ library: Object.assign({}, this.state.library, {
           playlistList: list,
           selectedPlaylist: 0
-        }) });
+        }), selectionSet: Object.assign({}, this.state.selectionSet, { playlist: [] }) });
     }
   }, {
     key: 'setAlbumList',
@@ -731,7 +734,7 @@ var MainSection = function (_React$Component) {
           }) }) });else this.setState({ library: Object.assign({}, this.state.library, {
           albumList: list,
           selectedAlbum: 0
-        }) });
+        }), selectionSet: Object.assign({}, this.state.selectionSet, { album: [] }) });
     }
   }, {
     key: 'setPlaylistSonglist',
@@ -766,7 +769,7 @@ var MainSection = function (_React$Component) {
               next: list.next
             }) }) });
       } else {
-        this.setState({ library: Object.assign({}, this.state.library, { songlist: list }) });
+        this.setState({ library: Object.assign({}, this.state.library, { songlist: list }), selectionSet: Object.assign({}, this.state.selectionSet, { songs: [] }) });
       }
     }
   }, {
@@ -812,17 +815,16 @@ var MainSection = function (_React$Component) {
       var _this4 = this;
 
       this.ajaxRequest = $.ajax({
-        url: "/get-playlist",
+        url: _utilities.PROJECT_URL + "get-playlist",
         data: {
           playlistUrl: playlistUrl
         }
       }).done(function (playlist) {
-        console.log(playlist);
         _this4.setState({
           url: {
             state: "playlist",
             songlist: playlist
-          }
+          }, selectionSet: Object.assign({}, _this4.state.selectionSet, { url: [] })
         });
         // $(".content-header__url-playlist-name").text(playlist.name);
       }).fail(function (xhr, status, errorThrown) {
@@ -830,7 +832,7 @@ var MainSection = function (_React$Component) {
           url: {
             state: "intro",
             songlist: null
-          }
+          }, selectionSet: Object.assign({}, _this4.state.selectionSet, { url: [] })
         });
         console.log("Error: " + errorThrown);
         console.log("Status: " + status);
@@ -846,16 +848,16 @@ var MainSection = function (_React$Component) {
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(data, remove) {
-                  return _this5.setSelection(data, remove);
+              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(source, data) {
+                  return _this5.setSelection(source, data);
                 }, token: this.props.state.spotifyLogin, state: this.state, setPlaylistList: function setPlaylistList(list, isAppend) {
                   return _this5.setPlaylistList(list, isAppend);
                 }, selectPlaylist: function selectPlaylist(indexx) {
                   return _this5.selectPlaylist(indexx);
                 } });
             case "album":
-              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(data, remove) {
-                  return _this5.setSelection(data, remove);
+              return React.createElement(_PlaylistList2.default, { setSelection: function setSelection(source, data) {
+                  return _this5.setSelection(source, data);
                 }, token: this.props.state.spotifyLogin, state: this.state, setAlbumList: function setAlbumList(list, isAppend) {
                   return _this5.setAlbumList(list, isAppend);
                 }, selectAlbum: function selectAlbum(indexx) {
@@ -892,25 +894,27 @@ var MainSection = function (_React$Component) {
                 'Loading from URL...'
               );
             default:
-              return React.createElement(_SongList2.default, { state: this.state });
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(source, data) {
+                  return _this6.setSelection(source, data);
+                }, state: this.state });
           }
         case "library":
           switch (this.state.library.state) {
             case "playlist":
-              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
-                  return _this6.setSelection(data, remove);
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(source, data) {
+                  return _this6.setSelection(source, data);
                 }, token: this.props.state.spotifyLogin, setPlaylistSonglist: function setPlaylistSonglist(list, isAppend) {
                   return _this6.setPlaylistSonglist(list, isAppend);
                 }, state: this.state });
             case "album":
-              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
-                  return _this6.setSelection(data, remove);
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(source, data) {
+                  return _this6.setSelection(source, data);
                 }, token: this.props.state.spotifyLogin, setAlbumSonglist: function setAlbumSonglist(list, isAppend) {
                   return _this6.setAlbumSonglist(list, isAppend);
                 }, state: this.state });
             case "songs":
-              return React.createElement(_SongList2.default, { setSelection: function setSelection(data, remove) {
-                  return _this6.setSelection(data, remove);
+              return React.createElement(_SongList2.default, { setSelection: function setSelection(source, data) {
+                  return _this6.setSelection(source, data);
                 }, token: this.props.state.spotifyLogin, setSavedSonglist: function setSavedSonglist(list, isAppend) {
                   return _this6.setSavedSonglist(list, isAppend);
                 }, state: this.state });
@@ -1544,31 +1548,42 @@ var PlaylistList = function (_React$Component) {
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			this.setListeners();
+			this.loadSelection();
 		}
 	}, {
 		key: 'componentDidUpdate',
 		value: function componentDidUpdate() {
-			this.setListeners();
+			this.loadSelection();
 		}
 	}, {
-		key: 'setListeners',
-		value: function setListeners() {
-			// $('.main-section__playlist-summary').click(function(event) {
-			//
-			//
-			// });
-			// $('.main-section__playlists-checkbox-label').click(function(event) {
-			// 	event.stopPropagation();
-			// });
-			// $('.main-section__playlists-checkbox').change(function(event) {
-			// 	if ($(this).parent().hasClass('main-section__playlist-summary_active'))
-			// 		if ($(this).prop("checked"))
-			// 			$('.main-section__song-checkbox').prop("checked", true);
-			// 		else
-			// 			$('.main-section__song-checkbox').prop("checked", false);
-			// 		}
-			// 	);
+		key: 'loadSelection',
+		value: function loadSelection() {
+			var lists = document.querySelectorAll('.main-section__playlist-summary:not(.loader)');
+			var selection = this.props.state.selectionSet[this.props.state.library.state];
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = selection[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var s = _step.value;
+
+					if (s.whole) lists[s.index].childNodes[2].checked = true;
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
 		}
 	}, {
 		key: 'getUserPlaylists',
@@ -1618,25 +1633,21 @@ var PlaylistList = function (_React$Component) {
 			if (!event.target.classList.contains("main-section__playlists-checkbox") && !event.target.classList.contains("main-section__playlists-checkbox-label")) {
 				$('.main-section__playlist-summary').removeClass("main-section__playlist-summary_active");
 				$(event.target).closest(".main-section__playlist-summary").addClass('main-section__playlist-summary_active');
-				this.props.selectPlaylist(index);
+				if (this.props.state.library.state == "playlist") {
+					this.props.selectPlaylist(index);
+				} else this.props.selectAlbum(index);
+			} else {
+				this.setSelection(event, index);
 			}
 		}
 	}, {
 		key: 'setSelection',
 		value: function setSelection(e, index) {
-			if (e.target.checked) {
-				this.props.setSelection({
-					index: index,
-					whole: true
-				});
-				// console.log("Found");
-			} else {
-				// console.log("Not Found");
-				this.props.setSelection({
-					index: index,
-					whole: false
-				});
-			}
+			if ($(e.target).parent().hasClass('main-section__playlist-summary_active')) $('.main-section__song-checkbox').prop("checked", e.target.checked);
+			this.props.setSelection(this.props.state.library.state, {
+				index: index,
+				whole: e.target.checked
+			});
 		}
 	}, {
 		key: 'parsePlaylist',
@@ -1665,9 +1676,7 @@ var PlaylistList = function (_React$Component) {
 						playlist.owner.id
 					)
 				),
-				React.createElement('input', { id: playlist.id, className: 'main-section__playlists-checkbox css-checkbox', type: 'checkbox', onChange: function onChange(e) {
-						return _this4.setSelection(e, index);
-					} }),
+				React.createElement('input', { id: playlist.id, className: 'main-section__playlists-checkbox css-checkbox', type: 'checkbox' }),
 				React.createElement('label', { className: 'main-section__playlists-checkbox-label css-label', htmlFor: playlist.id })
 			);
 		}
@@ -1677,29 +1686,29 @@ var PlaylistList = function (_React$Component) {
 			var _this5 = this;
 
 			var playlists = [];
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
 
 			try {
-				for (var _iterator = playlistList.items[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var playlist = _step.value;
+				for (var _iterator2 = playlistList.items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var playlist = _step2.value;
 
 					if (playlistList.items.indexOf(playlist) == this.props.state.library.selectedPlaylist) {
 						playlists.push(this.parsePlaylist(playlist, true));
 					} else playlists.push(this.parsePlaylist(playlist));
 				}
 			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
 					}
 				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
+					if (_didIteratorError2) {
+						throw _iteratorError2;
 					}
 				}
 			}
@@ -1741,8 +1750,8 @@ var PlaylistList = function (_React$Component) {
 			var album = a.album;
 			return React.createElement(
 				'div',
-				{ key: album.id, className: "main-section__playlist-summary" + (isActive ? " main-section__playlist-summary_active" : ""), onClick: function onClick() {
-						return _this6.props.selectAlbum(index);
+				{ key: album.id, className: "main-section__playlist-summary" + (isActive ? " main-section__playlist-summary_active" : ""), onClick: function onClick(e) {
+						return _this6.playlistClick(e, index);
 					} },
 				React.createElement('img', { className: 'main-section__playlist-cover', src: album.images.length > 2 ? album.images[2].url : album.images[0].url, alt: 'Album cover' }),
 				React.createElement(
@@ -1769,29 +1778,29 @@ var PlaylistList = function (_React$Component) {
 			var _this7 = this;
 
 			var albums = [];
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
 
 			try {
-				for (var _iterator2 = albumList.items[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var album = _step2.value;
+				for (var _iterator3 = albumList.items[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var album = _step3.value;
 
 					if (albumList.items.indexOf(album) == this.props.state.library.selectedAlbum) {
 						albums.push(this.parseAlbum(album, true));
 					} else albums.push(this.parseAlbum(album));
 				}
 			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
 					}
 				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
+					if (_didIteratorError3) {
+						throw _iteratorError3;
 					}
 				}
 			}
@@ -1908,13 +1917,45 @@ var SongList = function (_React$Component) {
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
-      switch (this.props.state.library.state) {
-        case "playlist":
-          if (this.props.state.library.playlistSonglist) if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedPlaylist).find(".main-section__playlists-checkbox").prop("checked")) $('.main-section__song-checkbox').prop("checked", true);
-          break;
-        case "album":
-          if (this.props.state.library.albumSonglist) if ($('.main-section__playlist-summary').eq(this.props.state.library.selectedAlbum).find(".main-section__playlists-checkbox").prop("checked")) $('.main-section__song-checkbox').prop("checked", true);
-          break;
+      var songs = document.querySelectorAll('.main-section__songs-row:not(.songs-loader)');
+      var selection;
+      if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) {
+        //getting selection information for playlist or album
+        switch (this.props.state.library.state) {
+          case "playlist":
+            listIndex = this.props.state.library.selectedPlaylist;
+            break;
+          case "album":
+            listIndex = this.props.state.library.selectedAlbum;
+            break;
+        }
+        var listIndex;
+        selection = this.getSelection(this.props.state.library.state, listIndex);
+      } else {
+        //getting selection information for saved songs or for playlist, loaded from url.
+        var source = void 0;
+        if (this.props.state.source == "library") {
+          source = "songs";
+        } else {
+          source = "url";
+        }
+        selection = this.props.state.selectionSet[source].length ? this.props.state.selectionSet[source][0] : null;
+      }
+      // console.log(selection);
+      if (selection) {
+        if (selection.whole) {
+          $('.main-section__song-checkbox').prop("checked", true);
+          // console.log("There is whole");
+        } else if (selection.items) {
+          // console.log("There are items");
+          // console.log(selection.items);
+          for (var i = 0; i < songs.length; i++) {
+            if (~selection.items.indexOf(i)) {
+              songs[i + 1].firstChild.firstChild.checked = true;
+              // console.log("Found " + i);
+            }
+          }
+        }
       }
     }
   }, {
@@ -1928,43 +1969,59 @@ var SongList = function (_React$Component) {
       return true;
     }
   }, {
+    key: 'getSelection',
+    value: function getSelection(source, index) {
+      return this.props.state.selectionSet[source].find(function (playlist) {
+        return playlist.index == index;
+      });
+    }
+    //TODO implement changing selectionSet for songs only
+
+  }, {
     key: 'songClickListener',
-    value: function songClickListener(e, id) {
-      var checkbox = document.getElementById(id).firstChild.firstChild;
-      if (e.target.className == "main-section__song-checkbox") {
-        if (checkbox.checked) {
-          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
+    value: function songClickListener(e, index) {
+      var listIndex;
+      switch (this.props.state.library.state) {
+        case "playlist":
+          listIndex = this.props.state.library.selectedPlaylist;
+          break;
+        case "album":
+          listIndex = this.props.state.library.selectedAlbum;
+          break;
+      }
+      var checkbox = document.getElementsByClassName('main-section__songs-row')[++index].firstChild.firstChild;
+      if (e.target.className != "main-section__song-checkbox") {
+        checkbox.checked = !checkbox.checked;
+      }
+      var isWhole = this.isAllSongsChecked();
+      if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) {
+        document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = isWhole;
+        if (isWhole) {
+          this.props.setSelection(this.props.state.library.state, {
+            index: listIndex,
+            whole: true
+          });
         } else {
-          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
+          var selectedSongs = this.getSelectedSongsArray();
+          this.props.setSelection(this.props.state.library.state, {
+            index: listIndex,
+            whole: false,
+            items: selectedSongs.length ? selectedSongs : null
+          });
         }
       } else {
-        checkbox.checked = !checkbox.checked;
-        if (!checkbox.checked) {
-          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album")) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = false;
+        var selectedSongs = this.getSelectedSongsArray();
+        var source;
+        if (this.props.state.source == "library") {
+          source = "songs";
         } else {
-          if (this.props.state.source == "library" && (this.props.state.library.state == "playlist" || this.props.state.library.state == "album") && this.isAllSongsChecked()) document.getElementsByClassName('main-section__playlist-summary_active')[0].childNodes[2].checked = true;
+          source = "url";
         }
+        this.props.setSelection(source, {
+          items: selectedSongs.length ? selectedSongs : null
+        });
       }
     }
-
-    // setListeners() {
-    // 	$('.main-section__song-row').click(function(event) {
-    // 		$(this).find('.main-section__song-checkbox').trigger('change');
-    // 	});
-    // 	$('.main-section__song-checkbox').change((event) => {
-    // 		if ($(event.target).is(':checked')) {
-    // 			$(event.target).prop('checked', false);
-    // 			if (this.props.state.source == "playlist")
-    // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', false);
-    // 			}
-    // 		else {
-    // 			$(event.target).prop("checked", true);
-    // 			if (this.props.state.source == "playlist" && this.isAllSongsChecked())
-    // 				$('.main-section__playlist-summary_active').find('.main-section__playlists-checkbox').prop('checked', true);
-    // 			}
-    // 		});
-    // }
-
   }, {
     key: 'isAllSongsChecked',
     value: function isAllSongsChecked() {
@@ -1995,6 +2052,17 @@ var SongList = function (_React$Component) {
       }
 
       return true;
+    }
+  }, {
+    key: 'getSelectedSongsArray',
+    value: function getSelectedSongsArray() {
+      var songs = document.querySelectorAll('.main-section__songs-row:not(.songs-loader)');
+      var indexes = [];
+      for (var i = 1; i < songs.length; i++) {
+        var checkbox = songs[i].firstChild.firstChild;
+        if (checkbox.checked) indexes.push(i - 1);
+      }
+      return indexes;
     }
   }, {
     key: 'getPlaylist',
@@ -2098,13 +2166,39 @@ var SongList = function (_React$Component) {
     }
   }, {
     key: 'parseSong',
-    value: function parseSong(song) {
+    value: function parseSong(item) {
       var _this5 = this;
 
+      var song = void 0;
+      var index;
+      switch (this.props.state.source) {
+        case "library":
+          switch (this.props.state.library.state) {
+            case "playlist":
+              index = this.props.state.library.playlistSonglist.items.indexOf(item);
+              song = item.track;
+              break;
+            case "album":
+              index = this.props.state.library.albumSonglist.items.indexOf(item);
+              song = item;
+              break;
+            case "songs":
+              index = this.props.state.library.songlist.items.indexOf(item);
+              song = item.track;
+              break;
+            default:
+              song = item;
+          }
+          break;
+        case "url":
+          index = this.props.state.url.songlist.tracks.items.indexOf(item);
+          song = item.track;
+          break;
+      }
       return React.createElement(
         'li',
-        { key: song.id, id: song.id, className: 'main-section__songs-row', onClick: function onClick(e) {
-            return _this5.songClickListener(e, song.id);
+        { key: song.id, className: 'main-section__songs-row', onClick: function onClick(e) {
+            return _this5.songClickListener(e, index);
           } },
         React.createElement(
           'div',
@@ -2169,7 +2263,7 @@ var SongList = function (_React$Component) {
       var _this6 = this;
 
       var songs = [];
-      var list = this.props.state.library.state == "songs" ? playlist.items : playlist.items;
+      var list = playlist.items;
       if (this.props.state.source == "url") list = playlist.tracks.items;
       var _iteratorNormalCompletion3 = true;
       var _didIteratorError3 = false;
@@ -2179,7 +2273,7 @@ var SongList = function (_React$Component) {
         for (var _iterator3 = list[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
           var song = _step3.value;
 
-          if (this.props.state.library.state == "album") songs.push(this.parseSong(song));else songs.push(this.parseSong(song.track));
+          songs.push(this.parseSong(song));
         }
       } catch (err) {
         _didIteratorError3 = true;
@@ -2237,7 +2331,7 @@ var SongList = function (_React$Component) {
                 return _this6.loadMore();
               }, hasMore: this.hasMore(), loader: React.createElement(
                 'div',
-                { className: 'loader main-section__songs-row' },
+                { className: 'songs-loader main-section__songs-row' },
                 ' Loading ...'
               ), useWindow: false },
             songs

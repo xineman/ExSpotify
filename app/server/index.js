@@ -7,8 +7,8 @@ const utilities = require('./utilities.js');
 var app = express();
 
 var requestOptions;
-var client_id = "";
-var client_secret = "";
+var client_id = "779a5324d5774343973fd9601952154c";
+var client_secret = "d7497c8b635f490e8ad8d5e1df451e69";
 // var redirect_uri = "http://185.5.52.181:3000/callback";
 var redirect_uri = "http://localhost:3000/callback";
 var stateKey = 'spotify_auth_state';
@@ -51,7 +51,6 @@ app.get('/get-playlist', function(req, res) {
 });
 
 app.get('/login', function(req, res) {
-	console.log(req.query);
 	client_redirect = req.query.url;
 	var scope = 'user-read-private user-library-read';
 	var state = utilities.generateRandomString(16);

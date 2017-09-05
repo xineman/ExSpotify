@@ -20,20 +20,23 @@ export function getCookie(cname) {
 	return null;
 }
 
-export function refreshToken(callback) {
+export function refreshToken(callback, fail) {
 	chrome.cookies.get({url: "http://localhost", name:"refresh_token"}, (cookie) => {
-		console.log("Going to refresh token");
-		$.ajax({
-			url: PROJECT_URL+"refresh_token",
-			data: {
-				refresh_token: cookie.value
-			}
-		}).done((data) => {
-			console.log("Refreshed");
-			callback();
-		})
+		if (cookie) {
+			console.log("Going to refresh token");
+			$.ajax({
+				url: PROJECT_URL+"refresh_token",
+				data: {
+					refresh_token: cookie.value
+				}
+			}).done((data) => {
+				console.log("Refreshed");
+				callback();
+			});
+		} else {
+			// fail();
+		}
 	});
-
 }
 
 export function hasMore(list) {

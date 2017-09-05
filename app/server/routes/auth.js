@@ -3,8 +3,8 @@ const request = require('request');
 const querystring = require('query-string');
 var router = express.Router();
 
-const client_id = "";
-const client_secret = "";
+const client_id = "5974883";
+const client_secret = "o3vkSMlRSrvLBzBZOAki";
 const redirect_uri = "http://localhost:3000/auth/vk/callback";
 const utilities = require('../utilities.js');
 var storedState;
